@@ -1,24 +1,34 @@
 const { exec } = require('child_process');
+const { errorLog, infoLog } = require('../Helper/console');
+
+/**
+ * @param {*} command Script string which will run for terminal.
+ * @returns promise with success message or error on unsuccess.
+ */
 
 const commandLineTool = async (command) => {
   const cmd = exec(command, (error, stdout, stderr) => {
     if (error) {
-      console.error(`Error: ${error.message}`);
+      errorLog(`Error: ${error.message}`, 'cmd');
       return;
     }
     if (stderr) {
-      console.error(`FFmpeg Output: ${stderr}`);
+      errorLog(`FFmpeg Output: ${stderr}`, 'cmd');
       return;
     }
-    console.info('successfully Completed.');
+    infoLog('successfully Completed.', 'cmd');
   });
-  cmd.on('close', (code) => {
-    console.info(code);
-    if (code <= 1) {
-      console.info('>>>>>>>>>>>>>>>>>>>>>>>>>>>>> command Executed Successfully.');
-    } else {
-      console.info('>>>>>>>>>>>>>>>>>>>>>>>>>>>>> command Execution stopped due to some Reason.');
-    }
+  return new Promise((resolve, reject) => {
+    cmd.on('close', (code) => {
+      infoLog(code);
+      if (code <= 1) {
+        infoLog('command Executed Successfully.', 'cmd');
+        resolve(true);
+        return;
+      }
+      errorLog('command Execution stopped due to some Reason.', 'cmd');
+      reject(new Error('this is now working'));
+    });
   });
 };
 

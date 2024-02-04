@@ -2,9 +2,10 @@ const express = require('express');
 const WebSocket = require('ws');
 const http = require('http');
 const cors = require('cors');
-const bodyParser = require('body-parser');
+const api = require('./App');
+const { infoLog } = require('./Models/Helper/console');
 require('dotenv').config();
-// const auth = require('./auth');
+
 const { PORT = 8080 } = process.env;
 
 //  <-------------------------------Variables - Start---------------------------------------------->
@@ -26,21 +27,12 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(cors('*'));
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
-
-// <------------------------------Routes - Start---------------------------------------------->
-app.use('/api/upload', require('./Routes/Upload'));
-app.use('/api/auth/register', require('./Routes/Register'));
-app.use('/api/auth/login', require('./Routes/Login'));
-
-app.use('/test/', require('../Test'));
-
-app.use('/', express.static('./Bin'));
-
+app.use('/app', express.static('./app'));
+app.use('/video', express.static('Bin'));
 // <-----------------------------------PORT------------------------------------->
 server.listen(PORT, () => {
-  console.info(`-----> The server is Running on : ${PORT} Port`);
+  api(app);
+  infoLog(`The server is Running on port ${PORT}`, 'server');
 });
 
-module.exports = { app, io };
+module.exports = app;

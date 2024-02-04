@@ -1,3 +1,5 @@
+const { userGet } = require('../../../Config/Database/SQLTable/user');
+
 /* eslint-disable no-useless-escape */
 const registerUser = (req, res, next) => {
   const userParameter = {
@@ -29,6 +31,16 @@ const registerUser = (req, res, next) => {
   }
 };
 
+const isUserExist = async (req, res, next) => {
+  const { email } = req.body;
+  const data = await userGet(email);
+  if (data.length === 0) {
+    next();
+    return;
+  }
+  res.send({ message: 'user already registered' });
+};
+
 const loginUser = (req, res, next) => {
   const userParameter = {
     email: undefined, password: undefined, ...req.body,
@@ -48,4 +60,4 @@ const loginUser = (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+module.exports = { registerUser, loginUser, isUserExist };
