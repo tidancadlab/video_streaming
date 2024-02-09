@@ -14,7 +14,7 @@ const timeStrToSeconds = (data, duration) => {
     const inSecond = Number(seconds) + Number(timeArray[1] * 60) + Number(timeArray[0] * 60 * 60);
     return (`${((parseFloat(`${inSecond}.${ms}`) / duration) * 100).toFixed(2)} % Completed`);
   }
-  return undefined;
+  return null;
 };
 
 module.exports = { timeStrToSeconds };

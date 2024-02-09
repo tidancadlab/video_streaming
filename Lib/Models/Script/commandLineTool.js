@@ -1,32 +1,29 @@
 const { exec } = require('child_process');
-const { errorLog, infoLog } = require('../Helper/console');
+const { errorLog, infoLog, warnLog } = require('../Helper/console');
 
 /**
- * @param {*} command Script string which will run for terminal.
- * @returns promise with success message or error on unsuccess.
+ * @param {string} command Script string which will run for terminal.
+ * @returns {string} promise with success message or error on unsuccess.
  */
 
 const commandLineTool = async (command) => {
-  const cmd = exec(command, (error, stdout, stderr) => {
-    if (error) {
-      errorLog(`Error: ${error.message}`, 'cmd');
-      return;
-    }
-    if (stderr) {
-      errorLog(`FFmpeg Output: ${stderr}`, 'cmd');
-      return;
-    }
-    infoLog('successfully Completed.', 'cmd');
+  warnLog(command, 'commandLineTool-top');
+  const cmd = exec(command);
+  cmd.stdout.on('data', (chunk) => {
+    infoLog(chunk, 'commandLineTool-stdout-data');
+  });
+  cmd.stderr.on('data', (chunk) => {
+    infoLog(chunk, 'commandLineTool-stderr-data');
   });
   return new Promise((resolve, reject) => {
     cmd.on('close', (code) => {
       infoLog(code);
       if (code <= 1) {
-        infoLog('command Executed Successfully.', 'cmd');
+        infoLog('command Executed Successfully.', `${__dirname} commandingTool`);
         resolve(true);
         return;
       }
-      errorLog('command Execution stopped due to some Reason.', 'cmd');
+      errorLog('command Execution stopped due to some Reason.', `${__dirname} commandingTool`);
       reject(new Error('this is now working'));
     });
   });

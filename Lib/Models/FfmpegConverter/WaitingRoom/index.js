@@ -5,7 +5,7 @@ const { infoLog, errorLog } = require('../../Helper/console');
 /**
  * @param {string} location where the file want to save in system.
  * @param {object} data the updated data in array.
- * @returns string of status
+ * @returns {Promise<string | error>}
  */
 const updateFile = (location, data) => new Promise((resolve, reject) => {
   fs.writeFile(`${`${__dirname}/${location}`}`, JSON.stringify(data), 'utf8', (error) => {
@@ -69,7 +69,7 @@ const dumpItem = async (item) => {
   try {
     await updateFile('dumpYard.json', dumpYard);
     infoLog('Dumping Successfully Completed', 'waiting room');
-    return item.id;
+    return true;
   } catch (error) {
     errorLog(error);
     return false;

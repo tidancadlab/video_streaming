@@ -6,11 +6,13 @@ const { run, get } = require('../dbSQL');
  * @returns `Object`
  */
 exports.insertVideoMetaData = async (id, meta) => {
+  console.info(typeof meta);
   try {
-    const query = `INSERT INTO videoMetaData (id, meta) values '${id}' '${meta}'`;
+    const query = `INSERT INTO videoMetaData values ('${id}', '${meta}')`;
     await run(query);
     return { message: 'meta insert successfully', id, ok: true };
   } catch (error) {
+    console.error(error);
     return { message: 'something went wrong', ok: false };
   }
 };

@@ -1,16 +1,22 @@
 /**
- * @param {*} path path of file `string`
- * @param {*} numberOfThumbnails Quantity of picture which will generator `string`
- * @param {*} destination Location where pictures will save in drive `string`
- * @returns FFMPEG script for thumbnail generator in `string`
+ * @param {string} path path of source file
+ * @param {string} numberOfThumbnails Quantity of picture which will generator
+ * @param {string} destination Location where pictures will save in drive
+ * @returns FFMPEG script for thumbnail
  */
 const ffmpegThumbnailScript = async (path, numberOfThumbnails, destination) => `
-        ffmpeg -i ${path} -vf "thumbnail,scale=640:360" -frames:v \
+        ffmpeg -ss 4 -i ${path} -vf "thumbnail,scale=640:360" -frames:v \
         ${numberOfThumbnails} -c:v h264_nvenc -vsync vfr -f image2 \
-        ${destination}/Images/thumb%d.jpg
+        ${destination}/images/thumb%d.jpg
         `;
 
-const ffmpegVideoHlsScript = async (path, destination) => `ffmpeg -loglevel debug -stats -v error -hwaccel nvdec -hwaccel_output_format cuda -extra_hw_frames 10 -i "${path}" \
+/**
+ *
+ * @param {string} path path of source file
+ * @param {string} destination location where data will save
+ * @returns
+ */
+const ffmpegVideoHlsScript = async (path, destination) => `ffmpeg -loglevel debug -stats -v error -hwaccel nvdec -hwaccel_output_format cuda -extra_hw_frames 5 -i "${path}" \
 -map 0:v:0 -map 0:a:0 -metadata:s:a:0 language=hin -metadata:s:a:0 title="Hindi" \
 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 \
 -c:v h264_nvenc -crf 22 -c:a aac -ar 48000 \

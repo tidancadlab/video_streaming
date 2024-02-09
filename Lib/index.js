@@ -3,7 +3,7 @@ const WebSocket = require('ws');
 const http = require('http');
 const cors = require('cors');
 const api = require('./App');
-const { infoLog } = require('./Models/Helper/console');
+const { infoLog, errorLog } = require('./Models/Helper/console');
 require('dotenv').config();
 
 const { PORT = 8080 } = process.env;

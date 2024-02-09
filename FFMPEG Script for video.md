@@ -124,18 +124,18 @@ ffmpeg -v error -hwaccel nvdec -hwaccel*output_format cuda -extra_hw_frames 10 -
 ## Final Script for HLS 144p to 1080p Resolution Video Format
 
 ```javascript
-const command = `ffmpeg -loglevel debug -stats -v error -hwaccel nvdec -hwaccel_output_format cuda -extra_hw_frames 10 -i "${req.body.file}" \
--map 0:v:0 -map 0:a:0 -metadata:s:a:0 language=hin -metadata:s:a:0 title="Hindi" \
--map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 \
--c:v h264_nvenc -crf 22 -c:a aac -ar 48000 \
--filter:v:0 "scale_cuda=h=480:w=-1" -b:v:0 700k -b:a:0 64k  \
--filter:v:1 "scale_cuda=h=720:w=-1" -b:v:1 1500k -b:a:1 128k  \
--filter:v:2 "scale_cuda=h=1080:w=-1" -b:v:2 2500k -b:a:2 192k  \
--filter:v:3 "scale_cuda=h=144:w=-1" -b:v:3 300k -b:a:3 64k  \
--filter:v:4 "scale_cuda=h=360:w=-1" -b:v:4 500k -b:a:4 64k  \
--var_stream_map "v:0,a:0,name:480p v:1,a:1,name:720p v:2,a:2,name:1080p v:3,a:3,name:144p v:4,a:4,name:360p" \
--preset slow -hls_list_size 10 -threads 0 -f hls -hls_playlist_type event -hls_time 3 \
--hls_flags independent_segments -master_pl_name "master.m3u8" -progress progress.log \
+const command = `ffmpeg -loglevel debug -stats -v error -hwaccel nvdec -hwaccel_output_format cuda -extra_hw_frames 5 -i "${req.body.file}" 
+-map 0:v:0 -map 0:a:0 -metadata:s:a:0 language=hin -metadata:s:a:0 title="Hindi" 
+-map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 
+-c:v h264_nvenc -crf 22 -c:a aac -ar 48000 
+-filter:v:0 "scale_cuda=h=480:w=-1" -b:v:0 700k -b:a:0 64k  
+-filter:v:1 "scale_cuda=h=720:w=-1" -b:v:1 1500k -b:a:1 128k  
+-filter:v:2 "scale_cuda=h=1080:w=-1" -b:v:2 2500k -b:a:2 192k  
+-filter:v:3 "scale_cuda=h=144:w=-1" -b:v:3 300k -b:a:3 64k  
+-filter:v:4 "scale_cuda=h=360:w=-1" -b:v:4 500k -b:a:4 64k  
+-var_stream_map "v:0,a:0,name:480p v:1,a:1,name:720p v:2,a:2,name:1080p v:3,a:3,name:144p v:4,a:4,name:360p" 
+-preset slow -hls_list_size 10 -threads 0 -f hls -hls_playlist_type event -hls_time 3 
+-hls_flags independent_segments -master_pl_name "master.m3u8" -progress progress.log 
 "C:/Coding/backup/Video_Streaming/bin/${req.body.out}/%v/manifest.m3u8"
  `;
 ```

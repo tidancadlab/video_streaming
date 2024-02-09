@@ -31,13 +31,20 @@ const colorCode = {
     BgWhite: '\x1b[47m',
     BgGray: '\x1b[100m',
 };
+
+const isColorPrint = (data) => ['number', 'string', 'boolean'].indexOf(typeof (data)) !== -1;
+
 /**
  * @param {*} message string which we want to log in console.
  * @param {*} type The log type.
  */
 exports.errorLog = (message, type = 'node') => {
     if (isDebug) {
-        console.error(colorCode.FgRed, `[${type}]`, Date().slice(4, 24), `: ${message}`, colorCode.Reset);
+        if (isColorPrint(message)) {
+            console.error(colorCode.FgRed, `[${type}]`, Date().slice(4, 24), `: ${message}`, colorCode.Reset);
+        } else {
+            console.error(`[${type}] ${Date().slice(4, 24)} :`, message);
+        }
     }
 };
 
@@ -47,7 +54,11 @@ exports.errorLog = (message, type = 'node') => {
  */
 exports.infoLog = (message, type = 'node') => {
     if (isDebug) {
-        console.info(typeof message === 'object' ? message : colorCode.FgBlue, `[${type}]`, Date().slice(4, 24), `: ${message}`, colorCode.Reset);
+        if (isColorPrint(message)) {
+            console.info(typeof message === 'object' ? message : colorCode.FgBlue, `[${type}]`, Date().slice(4, 24), `: ${message}`, colorCode.Reset);
+        } else {
+            console.info(`[${type}] ${Date().slice(4, 24)} :`, message);
+        }
     }
 };
 /**
@@ -56,6 +67,10 @@ exports.infoLog = (message, type = 'node') => {
  */
 exports.warnLog = (message, type = 'node') => {
     if (isDebug) {
-        console.warn(colorCode.FgYellow, `[${type}]`, Date().slice(4, 24), `: ${message}`, colorCode.Reset);
+        if (isColorPrint(message)) {
+            console.warn(colorCode.FgYellow, `[${type}]`, Date().slice(4, 24), `: ${message}`, colorCode.Reset);
+        } else {
+            console.warn(`[${type}] ${Date().slice(4, 24)} :`, message);
+        }
     }
 };
