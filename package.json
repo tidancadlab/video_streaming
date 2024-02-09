@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "repository": "https://github.com/tidancadlab/video_streaming/tree/testing",
-  "main": "./Lib/index.js",
+  "main": "./src/index.js",
   "scripts": {
     "start": "nodemon index",
     "nodemon": "node index"
