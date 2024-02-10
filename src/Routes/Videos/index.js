@@ -1,5 +1,5 @@
 const route = require('express/lib/router');
-const { getVideos } = require('../../Config/Database/SQLTable/video');
+const { getVideos } = require('../../Database/models/video');
 
 const videos = route();
 

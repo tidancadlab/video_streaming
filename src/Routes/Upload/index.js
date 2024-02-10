@@ -3,11 +3,11 @@ const { appendFile, mkdirSync, existsSync } = require('fs');
 const { Router } = require('express');
 const Ffmpeg = require('fluent-ffmpeg');
 const { randomUUID } = require('crypto');
-const { toHLS, videoConversion } = require('../../Models/FfmpegConverter');
-const dbConfig = require('../../Config/Database/dbConfig');
-const { getMeteData } = require('../../Models/Middleware/video');
-const { insertVideoMetaData } = require('../../Config/Database/SQLTable/videoMetaData');
-const { updateWaitingList, getWaitingList } = require('../../Models/FfmpegConverter/WaitingRoom');
+const { toHLS, videoConversion } = require('../../ffmpeg/FfmpegConverter');
+const dbConfig = require('../../Database/dbConfig');
+const { getMeteData } = require('../../Middleware/video');
+const { insertVideoMetaData } = require('../../Database/models/videoMetaData');
+const { updateWaitingList, getWaitingList } = require('../../ffmpeg/FfmpegConverter/WaitingRoom');
 
 // variables
 const router = Router();

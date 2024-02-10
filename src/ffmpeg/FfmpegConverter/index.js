@@ -1,10 +1,10 @@
 const Ffmpeg = require('fluent-ffmpeg');
 const { exec } = require('child_process');
-const { infoLog } = require('../Helper/console');
-const { timeStrToSeconds } = require('../Helper/timeStrToSec');
+const { infoLog } = require('../../logger');
+const { timeStrToSeconds } = require('../../utils/timeStrToSec');
 const { ffmpegVideoHlsScript } = require('../Script/ScriptGenerator');
 const { deleteItem, getWaitingItem, dumpItem } = require('./WaitingRoom');
-const { generateThumbnails } = require('../Helper/ImageGenerator/thumbnailGenerator');
+const { generateThumbnails } = require('../../ffmpeg/ImageGenerator/thumbnailGenerator');
 
 let underProgress = false;
 
