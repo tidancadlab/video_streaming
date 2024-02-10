@@ -1,7 +1,7 @@
 const fs = require('fs');
 let waitingList = require('./waitingList.json');
 const dumpYard = require('./dumpYard.json');
-const { infoLog, errorLog } = require('../../Helper/console');
+const { infoLog, errorLog } = require('../../../logger');
 /**
  * @param {string} location where the file want to save in system.
  * @param {object} data the updated data in array.

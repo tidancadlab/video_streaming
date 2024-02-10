@@ -1,6 +1,6 @@
 const { ffmpegThumbnailScript } = require('../Script/ScriptGenerator');
 const commandLineTool = require('../Script/commandLineTool');
-const { infoLog, errorLog } = require('../console');
+const { infoLog, errorLog } = require('../../logger');
 /**
  *
  * @param {object} file

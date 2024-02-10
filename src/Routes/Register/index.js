@@ -1,6 +1,6 @@
 const route = require('express/lib/router');
-const { registerUser, isUserExist } = require('../../Models/Middleware/User');
-const { userInsert } = require('../../Config/Database/SQLTable/user');
+const { registerUser, isUserExist } = require('../../Middleware/User');
+const { userInsert } = require('../../Database/models/user');
 
 const register = route();
 

@@ -1,4 +1,4 @@
-const { userGet } = require('../../Config/Database/SQLTable/user');
+const { userGet } = require('../../Database/models/user');
 
 /* eslint-disable no-useless-escape */
 const registerUser = (req, res, next) => {

@@ -1,5 +1,4 @@
 require('dotenv');
-
 const isDebug = process.env.DEBUG === 'true';
 /* eslint-disable indent */
 const colorCode = {
