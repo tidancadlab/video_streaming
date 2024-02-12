@@ -9,3 +9,4 @@ FFMPEG*.js
 .eslint*
 package-lock.json
 public
+.vscode
