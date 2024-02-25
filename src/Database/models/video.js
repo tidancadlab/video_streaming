@@ -1,41 +1,45 @@
-const { randomUUID } = require('crypto');
-const { all, run } = require('../dbSQL');
+const { all, run } = require('../SQLMethod');
 /**
  *
- * @param {number} offset it will take from 0
- * @param {number} limit 50 numbers is default
- * @param {string} orderBy time is default
- * @param {boolean} latest true means latest time videos
- * @returns `Object` of video `Array` or error `Object` on error, status and message
+ * @param {?{ groupBy: string, orderBy: string, limit: number, order : "ASC" | "DESC", offset : number}}
  */
-exports.getVideos = async (offset = 0, limit = 50, orderBy = 'time', latest = true) => {
+const getVideos = async (search) => {
+  const rest = search || {};
+  const { groupBy, orderBy, limit, order = 0, offset = 0 } = rest;
   try {
-    const query = `SELECT * FROM videos OFFSET ${offset} LIMIT ${limit} ORDER BY ${orderBy} ${latest ? 'ASC' : 'DESC'}`;
+    const query = `SELECT u.full_name, v.id AS video_id, v.path AS video_url, v.time_stamp AS video_created_at, json_extract('[' || GROUP_CONCAT(
+    JSON_OBJECT('id', t.id, 'url', t.url, 'size', t.size, 'height', t.height, 'width', t.width, 'created_at', t.time_stamp)
+    ) || ']', '$') AS thumbnails FROM user AS u JOIN video AS v ON u.id = v.user_id LEFT JOIN thumbnail AS t ON v.id = t.video_id GROUP BY v.id;`;
+    const result = await all(query);
     return {
-      video: await all(query),
+      video: result.map((v) => ({ ...v, thumbnails: JSON.parse(v.thumbnails) })),
       ok: true,
+      total: result.length,
       message: 'retrieve videos successfully',
     };
   } catch (error) {
+    console.log(error);
     return { message: 'something went wrong', error, ok: false };
   }
 };
+
 /**
- * it will insert video link data into videos table
- * @param {string} link video url link that will use to get video file
- * @param {string} location location where video stored in server
- * @param {string} metaId this is the id of video meta data which is stored in videoMetaData table
- * @param {string} watchId this is the id of video watch status like watched time, like, save
- * @param {string} thumbnailId this is id of thumbnail which is stored in thumbnails table
+ * @param {string} id
+ * @param {string} userId
  * @returns `Object` with message and status in `boolean`
  */
-exports.insertVideo = async (link, location, metaId, watchId, thumbnailId) => {
+const insertVideo = async (id, userId, path, source) => {
   try {
-    const query = `INSERT INTO videos (id, link, location, metaId, watchId, thumbnailId time, isReleased, isBlocked) 
-    values '${randomUUID()}' '${link}' '${location}' '${metaId}' '${watchId}' '${thumbnailId}' '${Date()}', false, false`;
+    const query = `INSERT INTO video (id, user_id, path, source, time_stamp) 
+    values ('${id}', '${userId}', '${path}', '${source}', '${Date.now()}')`;
     const data = await run(query);
-    return { message: 'successfully inserted', data, ok: true };
+    return { message: 'successfully inserted', ok: true, ...data };
   } catch (error) {
-    return { message: 'something went wrong', error, ok: false };
+    return { message: 'something went wrong', ok: false, error };
   }
+};
+
+module.exports = {
+  insert: insertVideo,
+  search: getVideos,
 };

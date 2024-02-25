@@ -1,14 +1,15 @@
 {
-  "name": "server",
+  "name": "video_streaming",
   "version": "1.0.0",
-  "description": "",
-  "repository": "https://github.com/tidancadlab/video_streaming/tree/testing",
+  "description": "Low bitrate good quality video streaming",
+  "repository": "https://github.com/tidancadlab/video_streaming/",
   "main": "./src/index.js",
   "scripts": {
     "start": "nodemon index",
-    "nodemon": "node index"
+    "nodemon": "node index",
+    "test": "mocha --recursive --exit"
   },
-  "author": "",
+  "author": "praveen kumar <tidancadlab@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -29,11 +30,13 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "chai": "^5.1.0",
     "eslint": "^8.2.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.28.0",
-    "eslint-plugin-react-hooks": "^4.3.0"
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "mocha": "^10.3.0"
   }
 }

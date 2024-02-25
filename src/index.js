@@ -2,20 +2,21 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const api = require('./App');
+const { warnLog } = require('./logger');
+const config = require('../config');
 require('dotenv').config();
 
-//  <-------------------------------Variables - Start---------------------------------------------->
 const { PORT = 8080 } = process.env;
 const app = express();
 const server = http.createServer(app);
 
 app.use(express.json());
 app.use(cors('*'));
+app.use('/storage', express.static(config.PATH.VIDEO_STORAGE));
 
-// <-----------------------------------PORT------------------------------------->
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   api(app);
-  console.info(`The server is Running on port ${PORT}`);
+  warnLog(`The server is Running on port ${PORT}`, 'server');
 });
 
 module.exports = app;

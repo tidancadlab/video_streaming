@@ -1,12 +1,12 @@
-const { ffprobe } = require('fluent-ffmpeg');
+const { ffprobe } = require("fluent-ffmpeg");
 
-exports.getMeteData = async (req, path) => new Promise((resolve, reject) => {
-  ffprobe(path, (err, data) => {
+exports.getMeteData = async (source) => new Promise((resolve, reject) => {
+  ffprobe(source, (err, data) => {
     if (err) {
       console.error(err);
       reject(err);
       return;
     }
-    resolve({ ...data, ...req.file });
+    resolve(data);
   });
 });

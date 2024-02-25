@@ -1,53 +1,56 @@
-const { randomUUID } = require('crypto');
-const bcrypt = require('bcrypt');
-const { all, run } = require('../dbSQL');
+const { hash } = require("bcrypt");
+const { randomUUID } = require("crypto");
+const { get, run } = require("../SQLMethod");
 
 /**
- * This is a function use to add new user in user table thorough user `data` object
- * ```json
- * data = {
- *  "email" : "user email address",
-    "password" : "user password",
-    "fullName" : "user full name",
-    "gender" : "user gender",
- * }
- * ```
- * @param {*} data the `object` where should be user details in key value pairs.
- * @returns status `object` of success or rejection error.
+ * @param {string} email
+ * @param {string} password
+ * @param {string} fullName
+ * @returns {Promise<{ok: boolean, message: string} | Error>}
  */
 
-exports.userInsert = async (data) => {
-  const {
-    id = randomUUID(),
-    email,
-    password,
-    fullName,
-    gender,
-  } = data;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const query = `insert into user ( id, email, password, fullName, gender )
-     values ( '${id}', '${email}', '${hashedPassword}', '${fullName}', '${gender}')`;
-  try {
-    await run(query);
+const userInsert = async (email, password, fullName) => {
+  if (!email || !password || !fullName) {
     return {
-      message: 'successfully registered',
-      username: email,
-      ok: true,
-      date: Date(),
+      ok: false,
+      message: "Please provide email, password and fullName",
     };
-  } catch (error) {
-    return { message: 'something went wrong', ...error, ok: false };
   }
+
+  const id = randomUUID();
+  const timeStamp = Date.now();
+  const hashedPassword = await hash(password, 10);
+
+  const query = `insert into user ( id, email, password, full_name, time_stamp )
+     values ( '${id}', '${email}', '${hashedPassword}', '${fullName}', ${timeStamp})`;
+  try {
+    const result = await run(query);
+    if (result.ok) {
+      return {
+        message: "successfully registered",
+        username: email,
+        ok: true,
+        date: Date(),
+      };
+    }
+  } catch (error) {
+    return { message: "something went wrong", ...error, ok: false };
+  }
+  return {
+    ok: false,
+    message: "something went wrong to execute SQL Query for insert new user",
+  };
 };
+
 /**
  * this will find user through email address which is unique.
  * @param {*} email email address of user
  * @returns `Array` of user with id, full name, gender, email.
  */
-exports.userGet = async (email) => {
-  const query = `select id, fullName, email, gender from user where "email" like '${email}'`;
+const userGet = async (email) => {
+  const query = `select * from user where "email" like '${email}'`;
   try {
-    const result = await all(query);
+    const result = await get(query);
     return result;
   } catch (error) {
     return { error: `something went wrong ${JSON.stringify(error)}` };
@@ -56,15 +59,21 @@ exports.userGet = async (email) => {
 
 /**
  * it will delete user through user unique id
- * @param {*} id user unique id `XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX-XXXXXXX`
+ * @param {string} id
  * @returns `object` of status
  */
-exports.userDelete = async (id) => {
+const userDelete = async (id) => {
   const query = `DELETE FROM user WHERE "id" ${id}`;
   try {
     const result = await run(query);
-    return { message: 'user successfully deleted', ok: true, result };
+    return { message: "user successfully deleted", ok: true, result };
   } catch (error) {
-    return { message: 'something went wrong', ...error, ok: false };
+    return { message: "something went wrong", ok: false, result: error };
   }
+};
+
+module.exports = {
+  register: userInsert,
+  remove: userDelete,
+  get: userGet,
 };

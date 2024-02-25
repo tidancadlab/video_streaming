@@ -1,57 +1,49 @@
-const Ffmpeg = require('fluent-ffmpeg');
 const { exec } = require('child_process');
+const { statSync } = require('fs');
+const path = require('path');
+const { randomUUID } = require('crypto');
 const { infoLog } = require('../../logger');
 const { timeStrToSeconds } = require('../../utils/timeStrToSec');
 const { ffmpegVideoHlsScript } = require('../Script/ScriptGenerator');
-const { deleteItem, getWaitingItem, dumpItem } = require('./WaitingRoom');
-const { generateThumbnails } = require('../../ffmpeg/ImageGenerator/thumbnailGenerator');
+const { deleteItem, getWaitingItem, updateWaitingList } = require('./WaitingRoom');
+const { thumbnail } = require('../thubmnailGenrater');
+const models = require('../../Database/models');
+const { PATH } = require('../../../config');
 
 let underProgress = false;
 
-/**
- *
- * ```javascript
- * .output(`./lib/public/media/${dirname}/Images/Thumbnails/M%d.jpg`);
- * .output(`./lib/public/media/${dirname}/Images/colors/color%d.png`);
- * ```
- * @param {string} dirname Will create this name folder inside `lib/public/media` directory.
- * @param {string} path Source Video path.
- * @returns { Promise<{message: string, ok: boolean} | error>}
- */
-const snapShot = (dirname, path) => new Promise((resolve, reject) => {
-  Ffmpeg(path)
-    .on('end', () => {
-      resolve({ message: 'Screenshots and color palette generated successfully.', ok: true });
-    })
-    .on('error', (error) => {
-      reject(new Error({ message: 'something went wrong', error, ok: false }));
-    })
-    .output(`./lib/public/media/${dirname}/Images/Thumbnails/M%d.jpg`)
-    .outputOptions('-q:v', '2', '-vf', 'fps=1/10,scale=-1:200,tile=4x4')
-    .output(`./lib/public/media/${dirname}/Images/colors/color%d.png`)
-    .run();
-});
+const addThumbnailInDB = async (imageList, videoObject) => {
+  infoLog('adding in table', 'thumbnail-item-insert');
+  const { tables, aspectRatio, height } = videoObject;
+  let result = {};
+  const start = async (i = 0) => {
+    try {
+      const pictureHight = imageList[i].size === -1 ? height : imageList[i].size;
+      const fileSize = statSync(path.join(PATH.VIDEO_STORAGE, imageList[i].url)).size;
+      result = await models.thumbnail.insert(randomUUID(), tables.videosId, path.join('storage', imageList[i].url), fileSize, pictureHight, aspectRatio * pictureHight);
+      if (imageList.length > i + 1) {
+        return start(i + 1);
+      }
+      return result;
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  };
+  await start();
+  return result;
+};
 
-/**
- * @param {object} file
- * @returns {boolean | Promise<boolean | error>}
- */
-
-const toHLS = async (file) => {
-  if (!file) return false;
-  const {
-    id,
-    path,
-    destination,
-    duration,
-  } = file;
-  const command = await ffmpegVideoHlsScript(path, destination);
+const toHLS = async (videoSource, destinationPath, videoDuration) => {
+  if (!videoSource || !destinationPath || !videoDuration) return new Error(`3 parameter required`);
+  const command = await ffmpegVideoHlsScript(videoSource, destinationPath);
+  console.log(command);
   return new Promise((resolve, reject) => {
     try {
       const exc = exec(command);
 
       exc.stderr.on('data', async (data) => {
-        const log = timeStrToSeconds(data, duration);
+        const log = timeStrToSeconds(data, videoDuration);
         if (log) {
           infoLog(log, 'HLS-stderr-data');
         }
@@ -66,18 +58,18 @@ const toHLS = async (file) => {
       exc.on('close', async (code) => {
         infoLog(`close code ${code}`, 'HLS-on-close');
         underProgress = false;
-        const result = await deleteItem(id);
-        resolve(result);
+        if (code === 0) {
+          resolve({ ok: true, message: 'Video conversion completed' });
+        } else {
+          resolve({ ok: false, message: 'something went wrong' });
+        }
       });
 
       exc.on('exit', async (code) => {
         infoLog(`exit code ${code}`, 'HLS-on-exit');
         if (code > 1) {
-          infoLog('Dumping Started', 'HLS-on-exit');
-          dumpItem(file)
-            .then((isTransferred) => isTransferred && deleteItem(id));
+          resolve({ ok: false, message: 'Something went wrong' });
         }
-        resolve(false);
       });
     } catch (error) {
       reject(error);
@@ -85,21 +77,42 @@ const toHLS = async (file) => {
   });
 };
 
-const videoConversion = async () => {
-  if (underProgress) return false;
+const videoConversion = async (vItem) => {
+  infoLog('called', 'videoConversion');
+  if (underProgress) return new Error('Please wait machine working on another video');
   underProgress = true;
-  return new Promise((res, rej) => {
-    try {
-      getWaitingItem()
-        .then((data) => toHLS(data))
-        .then(() => videoConversion());
-    } catch (error) {
-      underProgress = false;
-      rej(error);
+  try {
+    const videoItem = (await getWaitingItem()) || vItem;
+    console.log(videoItem);
+    if (typeof videoItem === 'object') {
+      infoLog('thumbnail generator going to start', 'before function');
+      const imageList = await thumbnail(videoItem.source, { size: [360, -1] });
+      infoLog('thumbnail generator end', 'before function');
+      console.log(imageList);
+      addThumbnailInDB(imageList, videoItem).then((response) => {
+        console.log(response);
+        if (response.ok) {
+          infoLog('video converter started', 'before-video-hls');
+          toHLS(videoItem.source, videoItem.path, videoItem.duration).then((result) => {
+            infoLog(underProgress, 'status of converter');
+            if (result.ok) {
+              deleteItem(videoItem.id);
+            } else {
+              updateWaitingList(videoItem.id, { hasError: true, message: 'something went wrong' });
+            }
+          });
+        }
+      });
+    } else {
+      return new Error('something went wrong in Snapshot');
     }
-  });
+  } catch (error) {
+    console.log(error);
+    underProgress = false;
+  }
+  return null;
 };
 
 module.exports = {
-  toHLS, snapShot, videoConversion,
+  videoConversion,
 };

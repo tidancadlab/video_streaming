@@ -1,16 +1,14 @@
-const route = require('express/lib/router');
-const { registerUser, isUserExist } = require('../../Middleware/User');
-const { userInsert } = require('../../Database/models/user');
+const Route = require("express/lib/router");
+const Middleware = require("../../Middleware");
+const controller = require("../../controller");
 
-const register = route();
+const register = Route();
 
-register.post('/', registerUser, isUserExist, async (req, res) => {
-  const result = await userInsert(req.body);
-  if (result.ok) {
-    res.status(200).send(result);
-    return;
-  }
-  res.status(403).send(result);
-});
+register
+  .route("/")
+  .post(
+    [Middleware.user.validateUserData, Middleware.user.isUserExist],
+    controller.user.newUser,
+  );
 
 module.exports = register;
