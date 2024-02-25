@@ -1,0 +1,431 @@
+[
+    {
+        "user": {
+            "id": {
+                "type": "string",
+                "primaryKey": true,
+                "notNull": true,
+                "description": "Unique identifier for the user."
+            },
+            "full_name": {
+                "type": "string",
+                "notNull": true,
+                "description": "Full name of the user."
+            },
+            "email": {
+                "type": "string",
+                "notNull": true,
+                "unique": true,
+                "description": "User's email address."
+            },
+            "password": {
+                "type": "string",
+                "notNull": true,
+                "description": "Hashed password for security."
+            },
+            "time_stamp": {
+                "type": "bigint",
+                "notNull": true,
+                "description": "Timestamp of user creation."
+            }
+        },
+        "user_profile": {
+            "id": {
+                "type": "string",
+                "primaryKey": true,
+                "notNull": true,
+                "description": "Unique identifier for the user profile."
+            },
+            "user_id": {
+                "type": "string",
+                "notNull": true,
+                "description": "Foreign key referencing the user table."
+            },
+            "gender": {
+                "type": "string",
+                "notNull": true,
+                "description": "User's gender."
+            },
+            "address": {
+                "type": "string",
+                "notNull": true,
+                "description": "User's postal address."
+            },
+            "contact_number": {
+                "type": "string",
+                "notNull": true,
+                "description": "User's contact phone number."
+            },
+            "is_premium_user": {
+                "type": "boolean",
+                "notNull": true,
+                "description": "Indicates whether the user has a premium subscription."
+            },
+            "time_stamp": {
+                "type": "datetime",
+                "notNull": true,
+                "description": "Timestamp of user profile creation."
+            },
+            "foreignKey": {
+                "user_id": {
+                    "table": "user",
+                    "column": "id",
+                    "description": "Foreign key constraint referencing the user table's id."
+                }
+            }
+        },
+        "reset_password": {
+            "id": {
+                "type": "string",
+                "primaryKey": true,
+                "notNull": true,
+                "description": "Unique identifier for the password reset request."
+            },
+            "user_id": {
+                "type": "string",
+                "notNull": true,
+                "description": "Foreign key referencing the user table."
+            },
+            "OTP": {
+                "type": "int",
+                "notNull": true,
+                "description": "One-time password used for password reset."
+            },
+            "time_stamp": {
+                "type": "datetime",
+                "notNull": true,
+                "description": "Timestamp of password reset request creation."
+            },
+            "foreignKey": {
+                "user_id": {
+                    "table": "user",
+                    "column": "id",
+                    "description": "Foreign key constraint referencing the user table's id."
+                }
+            }
+        },
+        "video": {
+            "id": {
+                "type": "string",
+                "primaryKey": true,
+                "notNull": true,
+                "description": "Unique identifier for the video."
+            },
+            "user_id": {
+                "type": "string",
+                "notNull": true,
+                "description": "Foreign key referencing the user who uploaded the video."
+            },
+            "path": {
+                "type": "string",
+                "notNull": true,
+                "description": "Path to the video file on the server"
+            },
+            "source": {
+                "type": "string",
+                "notNull": true,
+                "description": "source to the original video file on the server"
+            },
+            "is_relesed": {
+                "type": "boolean",
+                "notNull": true,
+                "description": "Indicates whether the video is publicly available.",
+                "defaultItem": "false"
+            },
+            "time_stamp": {
+                "type": "bigint",
+                "notNull": true,
+                "description": "Timestamp of video creation."
+            },
+            "foreignKey": {
+                "user_id": {
+                    "table": "user",
+                    "column": "id",
+                    "description": "Foreign key constraint referencing the user table's id."
+                }
+            }
+        },
+        "thumbnail": {
+            "id": {
+                "type": "string",
+                "primaryKey": true,
+                "notNull": true,
+                "description": "Unique identifier for the video thumbnail"
+            },
+            "video_id": {
+                "type": "string",
+                "notNull": true,
+                "description": "Foreign key referencing the video"
+            },
+            "url": {
+                "type": "string",
+                "notNull": true,
+                "description": "URL of the video thumbnail"
+            },
+            "size": {
+                "type": "string",
+                "notNull": true,
+                "description": "Size of the thumbnail in bytes"
+            },
+            "height": {
+                "type": "int",
+                "notNull": true,
+                "description": "Height of the thumbnail in pixels"
+            },
+            "width": {
+                "type": "int",
+                "notNull": true,
+                "description": "Width of the thumbnail in pixels"
+            },
+            "time_stamp": {
+                "type": "bigint",
+                "notNull": true,
+                "description": "Timestamp of thumbnail creation"
+            },
+            "foreignKey": {
+                "video_id": {
+                    "table": "video",
+                    "column": "id",
+                    "description": "Foreign key constraint referencing the video table's id"
+                }
+            }
+        },
+        "video_meta_info": {
+            "id": {
+                "type": "string",
+                "primaryKey": true,
+                "notNull": true,
+                "description": "Unique identifier for the video metadata"
+            },
+            "video_id": {
+                "type": "string",
+                "notNull": true,
+                "description": "Foreign key referencing the video"
+            },
+            "codec_name": {
+                "type": "string",
+                "notNull": true,
+                "description": "Name of the video codec"
+            },
+            "profile": {
+                "type": "int",
+                "notNull": true,
+                "description": "Video profile code"
+            },
+            "codec_tag_string": {
+                "type": "string",
+                "notNull": true,
+                "description": "String representation of the codec tag"
+            },
+            "codec_tag": {
+                "type": "string",
+                "notNull": true,
+                "description": "Codec tag"
+            },
+            "width": {
+                "type": "int",
+                "notNull": true,
+                "description": "Width of the video in pixels"
+            },
+            "height": {
+                "type": "int",
+                "notNull": true,
+                "description": "Height of the video in pixels"
+            },
+            "level": {
+                "type": "string",
+                "notNull": true,
+                "description": "Video level"
+            },
+            "frame_rate": {
+                "type": "string",
+                "notNull": true,
+                "description": "Video frame rate"
+            },
+            "time_base": {
+                "type": "string",
+                "notNull": true,
+                "description": "Time base of the video"
+            },
+            "duration_ts": {
+                "type": "string",
+                "notNull": true,
+                "description": "Duration of the video in timestamps"
+            },
+            "duration": {
+                "type": "string",
+                "notNull": true,
+                "description": "Duration of the video in human-readable format"
+            },
+            "bit_rate": {
+                "type": "string",
+                "notNull": true,
+                "description": "Video bit rate"
+            },
+            "nb_frames": {
+                "type": "string",
+                "notNull": true,
+                "description": "Number of frames in the video"
+            },
+            "byte_size": {
+                "type": "bigint",
+                "notNull": true,
+                "description": "Size of the video file in bytes"
+            },
+            "time_stamp": {
+                "type": "datetime",
+                "notNull": true,
+                "description": "Timestamp of metadata creation"
+            },
+            "foreignKey": {
+                "video_id": {
+                    "table": "video",
+                    "column": "id",
+                    "description": "Foreign key constraint referencing the video table's id"
+                }
+            }
+        },
+        "video_profile": {
+            "id": {
+                "type": "string",
+                "primaryKey": true,
+                "notNull": true,
+                "description": "Unique identifier for the video profile"
+            },
+            "video_id": {
+                "type": "string",
+                "notNull": true,
+                "description": "Foreign key referencing the video table"
+            },
+            "title": {
+                "type": "string",
+                "notNull": true,
+                "description": "Title of the video"
+            },
+            "description": {
+                "type": "string",
+                "notNull": true,
+                "description": "Description of the video"
+            },
+            "catagery": {
+                "type": "string",
+                "notNull": true,
+                "description": "Category of the video"
+            },
+            "tags": {
+                "type": "string",
+                "notNull": true,
+                "description": "Comma-separated tags associated with the video"
+            },
+            "url": {
+                "type": "string",
+                "notNull": true,
+                "description": "URL of the video (possibly different from video.url)"
+            },
+            "path": {
+                "type": "string",
+                "notNull": true,
+                "description": "Path to the video file on the server"
+            },
+            "time_stamp": {
+                "type": "datetime",
+                "notNull": true,
+                "description": "Timestamp of video profile creation"
+            },
+            "foreignKey": {
+                "video_id": {
+                    "table": "video",
+                    "column": "id",
+                    "description": "Foreign key constraint referencing the video table's id"
+                }
+            }
+        },
+        "watch_status": {
+            "id": {
+                "type": "string",
+                "primaryKey": true,
+                "notNull": true,
+                "description": "Unique identifier for the watch status"
+            },
+            "video_id": {
+                "type": "string",
+                "notNull": true,
+                "description": "Foreign key referencing the video table"
+            },
+            "user_id": {
+                "type": "string",
+                "notNull": true,
+                "description": "Foreign key referencing the user table"
+            },
+            "is_watched": {
+                "type": "boolean",
+                "notNull": true,
+                "description": "Indicates whether the user has watched the video"
+            },
+            "current_time": {
+                "type": "bigint",
+                "notNull": true,
+                "description": "Current time position the user has reached in the video"
+            },
+            "watch_percent": {
+                "type": "decimal",
+                "precision": 5,
+                "scale": 2,
+                "notNull": true,
+                "description": "Percentage of the video the user has watched"
+            },
+            "time_stamp": {
+                "type": "datetime",
+                "notNull": true,
+                "description": "Timestamp of watch status creation"
+            },
+            "foreignKey": {
+                "video_id": {
+                    "table": "video",
+                    "column": "id",
+                    "description": "Foreign key constraint referencing the video table's id"
+                },
+                "user_id": {
+                    "table": "user",
+                    "column": "id",
+                    "description": "Foreign key constraint referencing the user table's id"
+                }
+            }
+        },
+        "saved_video": {
+            "id": {
+                "type": "string",
+                "primaryKey": true,
+                "notNull": true,
+                "description": "Unique identifier for the saved video entry"
+            },
+            "video_id": {
+                "type": "string",
+                "notNull": true,
+                "description": "Foreign key referencing the video table"
+            },
+            "user_id": {
+                "type": "string",
+                "notNull": true,
+                "description": "Foreign key referencing the user table"
+            },
+            "time_stamp": {
+                "type": "datetime",
+                "notNull": true,
+                "description": "Timestamp of video saving"
+            },
+            "foreignKey": {
+                "video_id": {
+                    "table": "video",
+                    "column": "id",
+                    "description": "Foreign key constraint referencing the video table's id"
+                },
+                "user_id": {
+                    "table": "user",
+                    "column": "id",
+                    "description": "Foreign key constraint referencing the user table's id"
+                }
+            }
+        }
+    }
+]

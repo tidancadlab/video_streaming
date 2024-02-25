@@ -2,12 +2,13 @@
 const { run, get } = require("../SQLMethod");
 /**
  * @param {string} id
- * @param {data}
+ * @param {string}
+ * @returns `Object`
  */
 const insertVideoMetaData = async (
   id,
   {
-    videosId,
+    video_id,
     codec_name,
     profile,
     codec_tag_string,
@@ -26,13 +27,13 @@ const insertVideoMetaData = async (
 ) => {
   const time_stamp = Date.now();
   try {
-    const query = `INSERT INTO video_meta_info (
+    const query = `INSERT INTO videoMetaData (
       id, video_id, codec_name, profile, codec_tag_string, 
       codec_tag, width, height, level, frame_rate, time_base, 
       duration_ts, duration, bit_rate, nb_frames, byte_size, time_stamp
-    ) values ( "${id}", "${videosId}", "${codec_name}", "${profile}", "${codec_tag_string}", "${codec_tag}", 
-  ${width}, ${height}, "${level}", "${frame_rate}", "${time_base}", "${duration_ts}", 
-  "${duration}", "${bit_rate}", "${nb_frames}", ${byte_size}, ${time_stamp} )`;
+    ) values ( ${video_id}, ${codec_name}, ${profile}, ${codec_tag_string}, ${codec_tag}, 
+  ${width}, ${height}, ${level}, ${frame_rate}, ${time_base}, ${duration_ts}, 
+  ${duration}, ${bit_rate}, ${nb_frames}, ${byte_size}, ${time_stamp} )`;
     const result = await run(query);
     return {
       message: "meta insert successfully",

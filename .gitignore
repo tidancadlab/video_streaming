@@ -10,3 +10,9 @@ FFMPEG*.js
 package-lock.json
 public
 .vscode
+assets
+documents
+SQLite
+test
+.prettierrc
+tables.sqlite
