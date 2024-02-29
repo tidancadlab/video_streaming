@@ -1,41 +1,39 @@
 const { appendFile } = require('fs');
 const { randomUUID } = require('crypto');
 const { videoConversion } = require('../ffmpeg/FfmpegConverter');
+const { updateWaitingList } = require('../ffmpeg/FfmpegConverter/WaitingRoom');
+const { mkDir } = require('../utils/simpleFunction');
 const models = require('../Database/models');
 const Middleware = require('../Middleware');
 const config = require('../../config');
-const { generateIds, joinPath, createDirectory } = require('../utils');
-const videoQueueItem = require('../helper/videoQueue');
+const { generateIds } = require('../utils');
 
-const getVideoId = async (id) => (id.length < 20 ? randomUUID() : id);
+const videoId = async (id) => (id.length < 20 ? randomUUID() : id);
 
 const videoUpload = async (req, res) => {
-  const { body, payload, file } = req;
-  const { extension, id, isLast: isTail } = body;
   try {
-    // checking id getting or not from front end if not then will create.
-    const videoId = await getVideoId(id);
-    const fileName = `${config.FILENAME.VIDEO_ORIGINAL}.${extension}`;
-    const videoDirectoryPath = await joinPath(config.PATH.VIDEO_STORAGE, videoId);
-    await createDirectory(videoDirectoryPath);
-    const videoSourcePath = await joinPath(videoDirectoryPath, fileName);
-    appendFile(videoSourcePath, Buffer.from(file.buffer), (err) => {
+    const { body, payload, file } = req;
+    const id = await videoId(body.id);
+    await mkDir(`${config.PATH.VIDEO_STORAGE}/${id}/thumbnails`);
+    const source = `${config.PATH.VIDEO_STORAGE}/${id}/original.${body.extension}`;
+    const path = id;
+    appendFile(source, Buffer.from(file.buffer), (err) => {
       if (err) {
-        console.log(err);
+        res.status(500).send({ err });
       }
     });
-    if (isTail === 'true') {
-      const { streams, format } = await Middleware.video.getMeteData(videoSourcePath);
-      const { height, width, r_frame_rate: frameRate, duration } = streams[0];
+    if (req.body.isLast === 'true') {
+      const { streams, format } = await Middleware.video.getMeteData(source);
+      const { height, width, r_frame_rate, duration } = streams[0];
+      const { videosId, metaId, thumbnailId, watchId } = await generateIds('videosId', 'metaId', 'thumbnailId', 'watchId');
       const aspectRatio = width / height;
-      await videoQueueItem.createItem(videoId, { videoDirectoryPath, aspectRatio, duration, fileName, height });
-      await models.video.insert(id, payload.id, `${await joinPath(videoId, fileName)}`);
-      await models.metaData.insert(randomUUID(), { id, ...streams[0], byte_size: format.size, frameRate });
-      videoQueueItem.updateStatusCode(videoId, 200);
-      videoConversion();
-      res.send({ success: true, message: 'completed', videoSourcePath, id });
+      const videoItem = await updateWaitingList(id, { tables: { videosId, metaId, thumbnailId, watchId }, source, path, duration, aspectRatio, height });
+      await models.video.insert(videosId, payload.id, `storage/${id}/hls/master.m3u8`, `${id}/original.${body.extension}`);
+      await models.metaData.insert(metaId, { videosId, ...streams[0], byte_size: format.size, frame_rate: r_frame_rate });
+      videoConversion(videoItem);
+      res.send({ success: true, message: 'completed', source, videosId });
     } else {
-      res.json({ id: videoId, time: Date.now() });
+      res.json({ id, time: Date.now() });
     }
   } catch (error) {
     console.log(error);
@@ -52,13 +50,4 @@ const searchVideo = async (req, res) => {
   res.status(403).send(result);
 };
 
-const videoById = async (req, res) => {
-  const data = await models.video.getVideoById(req.params.id);
-  if (data.ok) {
-    res.send(data);
-    return;
-  }
-  res.send('something went wrong');
-};
-
-module.exports = { videoUpload, searchVideo, generateIds, videoById };
+module.exports = { videoUpload, searchVideo, generateIds };

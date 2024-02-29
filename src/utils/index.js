@@ -1,4 +1,3 @@
-const path = require('path');
 const { randomUUID } = require('crypto');
 const { existsSync, mkdirSync } = require('fs');
 const { tableSchema } = require('../Database/schema');
@@ -24,22 +23,13 @@ const createTables = async (index = 0) => {
 };
 
 /**
- * @param {string} absolutePath
+ * @param {string} path
  */
-const mkDir = async (absolutePath) => {
-  if (!existsSync(absolutePath)) {
-    const result = mkdirSync(absolutePath, { recursive: true });
+const mkDir = async (path) => {
+  if (!existsSync(path)) {
+    const result = mkdirSync(path, { recursive: true });
     infoLog(result, __filename);
   }
-};
-
-/**
- * @param  {...string} arg
- * @returns
- */
-const joinPath = async (...arg) => {
-  const result = path.join(...arg);
-  return result.replace(/\\/g, '/');
 };
 
 const generateIds = async (...rest) =>
@@ -48,4 +38,4 @@ const generateIds = async (...rest) =>
     return { ...item, [v]: randomUUID() };
   });
 
-module.exports = { initializeTable: createTables, createDirectory: mkDir, generateIds, joinPath };
+module.exports = { initializeTable: createTables, createDirectory: mkDir, generateIds };

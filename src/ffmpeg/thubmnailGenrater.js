@@ -1,8 +1,6 @@
 const { exec } = require('child_process');
 const path = require('path');
 const { mkDir } = require('../utils/simpleFunction');
-const { joinPath } = require('../utils');
-const { infoLog } = require('../logger');
 
 /**
  * @param {string} videoSource - should be absolute path.
@@ -14,7 +12,7 @@ const { infoLog } = require('../logger');
  * @returns {Promise<[{url: string, size: number}] | Error>}
  */
 
-const createThumbnail = async (videoSource, config) => {
+const snapShot = async (videoSource, config) => {
   const rest = config || {};
   if (!videoSource) return new Error('Please pass all required parameters');
   const { dir } = path.parse(videoSource);
@@ -22,7 +20,7 @@ const createThumbnail = async (videoSource, config) => {
   if (path.isAbsolute(folder)) return new Error('folder name should not be absolute, it should be relative from source folder');
   const filename = rest.filename || 'thumbnail';
   let extension = filename.split('.', 2)[1];
-  const outPath = await joinPath(dir, folder);
+  const outPath = path.join(dir, folder);
   let time;
   let size = [];
   const imageUrls = [];
@@ -56,12 +54,12 @@ const createThumbnail = async (videoSource, config) => {
     }
   }
 
-  infoLog('thumbnail generator started...', 'Thumbnail-generator');
   async function generate(n) {
     const pictureName = `${filename}_${size[n] !== -1 ? size[n] : 'original'}${extension}`;
-    const output = await joinPath(outPath, pictureName);
-    const url = await joinPath(dir.split('/').pop(), folder, pictureName);
+    const output = path.join(outPath, pictureName);
+    const url = path.join(dir.split('/').pop(), folder, pictureName);
     const command = `ffmpeg -v error -ss ${time} -i ${videoSource} -y -vf "thumbnail=360,scale=-1:${size[n]}" -frames:v 1 ${output}`;
+    console.log(command);
     return new Promise((resolve) => {
       try {
         const exc = exec(command, (err) => err && console.log(err));
@@ -81,8 +79,7 @@ const createThumbnail = async (videoSource, config) => {
     });
   }
   const data = await generate(size.length - 1);
-  infoLog('thumbnail generated', 'Thumbnail-generator');
   return data;
 };
 
-module.exports = { createThumbnail };
+module.exports = { thumbnail: snapShot };

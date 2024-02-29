@@ -7,7 +7,7 @@
   "scripts": {
     "start": "nodemon index",
     "nodemon": "node index",
-    "test": "node ./src/queueConatiner"
+    "test": "mocha --recursive --exit"
   },
   "author": "praveen kumar <tidancadlab@gmail.com>",
   "license": "ISC",

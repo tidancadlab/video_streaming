@@ -1,5 +1,3 @@
-const { joinPath } = require('../../../utils');
-
 /**
  * @param {string} path path of source file
  * @param {string} numberOfThumbnails Quantity of picture which will generator
@@ -14,12 +12,11 @@ const ffmpegThumbnailScript = async (path, numberOfThumbnails, destination) => `
 
 /**
  *
- * @param {string} dirPath Absolute path of video directory
- * @param {string} fileName Name of video file which want to convert in HLS
+ * @param {string} source path of source file
+ * @param {string} destination location where data will save
  * @returns
  */
-const ffmpegVideoHlsScript = async (dirPath, fileName) => `ffmpeg -loglevel debug -stats -v error \
--hwaccel nvdec -hwaccel_output_format cuda -extra_hw_frames 5 -i "${await joinPath(dirPath, fileName)}" \
+const ffmpegVideoHlsScript = async (source, destination) => `ffmpeg -loglevel debug -stats -v error -hwaccel nvdec -hwaccel_output_format cuda -extra_hw_frames 5 -i "${source}" \
 -map 0:v:0 -map 0:a:0 -metadata:s:a:0 language=hin -metadata:s:a:0 title="Hindi" \
 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 \
 -c:v h264_nvenc -crf 22 -c:a aac -ar 48000 \
@@ -30,8 +27,8 @@ const ffmpegVideoHlsScript = async (dirPath, fileName) => `ffmpeg -loglevel debu
 -filter:v:4 "scale_cuda=h=360:w=-1" -b:v:4 500k -b:a:4 64k  \
 -var_stream_map "v:0,a:0,name:480p v:1,a:1,name:720p v:2,a:2,name:1080p v:3,a:3,name:144p v:4,a:4,name:360p" \
 -preset slow -hls_list_size 10 -threads 0 -f hls -hls_playlist_type event -hls_time 3 \
--hls_flags independent_segments -master_pl_name "master.m3u8" \
-"${dirPath}/hls/%v/manifest.m3u8"`;
+-hls_flags independent_segments -master_pl_name "master.m3u8" -progress progress.log \
+"C:/Coding/storage/${destination}/hls/%v/manifest.m3u8"`;
 
 module.exports = {
   ffmpegThumbnailScript,
