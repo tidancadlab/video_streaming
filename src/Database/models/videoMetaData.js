@@ -15,7 +15,7 @@ const insertVideoMetaData = async (
     width,
     height,
     level,
-    frame_rate,
+    frameRate,
     time_base,
     duration_ts,
     duration,
@@ -31,7 +31,7 @@ const insertVideoMetaData = async (
       codec_tag, width, height, level, frame_rate, time_base, 
       duration_ts, duration, bit_rate, nb_frames, byte_size, time_stamp
     ) values ( "${id}", "${videosId}", "${codec_name}", "${profile}", "${codec_tag_string}", "${codec_tag}", 
-  ${width}, ${height}, "${level}", "${frame_rate}", "${time_base}", "${duration_ts}", 
+  ${width}, ${height}, "${level}", "${frameRate}", "${time_base}", "${duration_ts}", 
   "${duration}", "${bit_rate}", "${nb_frames}", ${byte_size}, ${time_stamp} )`;
     const result = await run(query);
     return {
