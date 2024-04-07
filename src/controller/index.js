@@ -1,12 +1,6 @@
-const { newUser, getUser } = require("./user");
-const { videoUpload } = require("./video");
+const user = require('./user');
+const video = require('./video');
 
-module.exports = {
-  user: {
-    newUser,
-    getUser,
-  },
-  video: {
-    videoUpload,
-  },
-};
+const controllers = { user, video };
+
+module.exports = controllers;
