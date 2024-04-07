@@ -1,0 +1,79 @@
+[
+    {
+        "id": "56803d7a-93f1-4d63-9d58-b48350be48d2",
+        "videoDirectoryPath": "c:/coding/storage/56803d7a-93f1-4d63-9d58-b48350be48d2",
+        "fileName": "original.mp4",
+        "aspectRatio": 1.7777777777777777,
+        "height": 1080,
+        "duration": 10.341467,
+        "statusCode": 400,
+        "hasError": false,
+        "timeStamp": 1709211769612
+    },
+    {
+        "id": "9fc40bf8-eb6b-45e2-8c34-f8eb50dc7dec",
+        "videoDirectoryPath": "c:/coding/storage/9fc40bf8-eb6b-45e2-8c34-f8eb50dc7dec",
+        "fileName": "original.mp4",
+        "aspectRatio": 1.7777777777777777,
+        "height": 1080,
+        "duration": 10.341467,
+        "statusCode": 400,
+        "hasError": false,
+        "timeStamp": 1709216604622
+    },
+    {
+        "id": "be83c786-c758-4ec8-978e-e39119e2a1e7",
+        "videoDirectoryPath": "c:/coding/storage/be83c786-c758-4ec8-978e-e39119e2a1e7",
+        "fileName": "original.mp4",
+        "aspectRatio": 1.7777777777777777,
+        "height": 1080,
+        "duration": 10.341467,
+        "statusCode": 400,
+        "hasError": false,
+        "timeStamp": 1709217342712
+    },
+    {
+        "id": "896b54a8-c804-4f80-b1c8-25ef629b6fbe",
+        "videoDirectoryPath": "c:/coding/storage/896b54a8-c804-4f80-b1c8-25ef629b6fbe",
+        "fileName": "original.mp4",
+        "aspectRatio": 1.7777777777777777,
+        "height": 1080,
+        "duration": 10.341467,
+        "statusCode": 400,
+        "hasError": false,
+        "timeStamp": 1709218770470
+    },
+    {
+        "id": "e2f461f8-e1fb-411a-b9c8-6055e4842c31",
+        "videoDirectoryPath": "c:/coding/storage/e2f461f8-e1fb-411a-b9c8-6055e4842c31",
+        "fileName": "original.mp4",
+        "aspectRatio": 1.7777777777777777,
+        "height": 720,
+        "duration": 1340.866667,
+        "statusCode": 401,
+        "hasError": false,
+        "timeStamp": 1709219515686
+    },
+    {
+        "id": "0f3460b9-cda4-4cb6-a902-d2c3fd8942f1",
+        "videoDirectoryPath": "c:/coding/storage/0f3460b9-cda4-4cb6-a902-d2c3fd8942f1",
+        "fileName": "original.MOV",
+        "aspectRatio": 1.7777777777777777,
+        "height": 1080,
+        "duration": 98.223125,
+        "statusCode": 400,
+        "hasError": false,
+        "timeStamp": 1709222369038
+    },
+    {
+        "id": "99da5587-edc3-4eed-ac95-fd14bd117308",
+        "videoDirectoryPath": "c:/coding/storage/99da5587-edc3-4eed-ac95-fd14bd117308",
+        "fileName": "original.MOV",
+        "aspectRatio": 1.7777777777777777,
+        "height": 1080,
+        "duration": 5.5055,
+        "statusCode": 400,
+        "hasError": false,
+        "timeStamp": 1709222464425
+    }
+]

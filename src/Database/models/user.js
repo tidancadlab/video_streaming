@@ -1,6 +1,6 @@
-const { hash } = require('bcrypt');
-const { randomUUID } = require('crypto');
-const { get, run } = require('../SQLMethod');
+const { hash } = require("bcrypt");
+const { randomUUID } = require("crypto");
+const { get, run } = require("../SQLMethod");
 
 /**
  * @param {string} email
@@ -13,7 +13,7 @@ const userInsert = async (email, password, fullName) => {
   if (!email || !password || !fullName) {
     return {
       ok: false,
-      message: 'Please provide email, password and fullName',
+      message: "Please provide email, password and fullName",
     };
   }
 
@@ -24,16 +24,22 @@ const userInsert = async (email, password, fullName) => {
   const query = `insert into user ( id, email, password, full_name, time_stamp )
      values ( '${id}', '${email}', '${hashedPassword}', '${fullName}', ${timeStamp})`;
   try {
-    await run(query);
-    return {
-      message: 'successfully registered',
-      username: email,
-      ok: true,
-      date: Date(),
-    };
+    const result = await run(query);
+    if (result.ok) {
+      return {
+        message: "successfully registered",
+        username: email,
+        ok: true,
+        date: Date(),
+      };
+    }
   } catch (error) {
-    return { message: error.message };
+    return { message: "something went wrong", ...error, ok: false };
   }
+  return {
+    ok: false,
+    message: "something went wrong to execute SQL Query for insert new user",
+  };
 };
 
 /**
@@ -60,9 +66,9 @@ const userDelete = async (id) => {
   const query = `DELETE FROM user WHERE "id" ${id}`;
   try {
     const result = await run(query);
-    return { message: 'user successfully deleted', ok: true, result };
+    return { message: "user successfully deleted", ok: true, result };
   } catch (error) {
-    return { message: 'something went wrong', ok: false, result: error };
+    return { message: "something went wrong", ok: false, result: error };
   }
 };
 
