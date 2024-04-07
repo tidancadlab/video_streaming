@@ -1,5 +1,5 @@
 const { exec } = require('child_process');
-const { infoLog, errorLog, warnLog } = require('../../logger');
+const { infoLog, errorLog, warnLog } = require('../logger');
 
 /**
  * @param {string} command Script string which will run for terminal.

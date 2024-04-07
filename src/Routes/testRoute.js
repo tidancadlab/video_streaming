@@ -1,6 +1,6 @@
 const Route = require('express/lib/router');
 const { videoById } = require('../controller/video');
-const videoQueueItem = require('../helper/videoQueue');
+const videoQueueItem = require('../queue');
 
 const testRoute = Route();
 
