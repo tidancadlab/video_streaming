@@ -1,11 +1,14 @@
-const multer = require('multer');
-const { Router } = require('express');
-const controllers = require('../../controller');
-const userAuthentication = require('../../auth');
+const { Router } = require("express");
+const multer = require("multer");
+const auth = require("../../auth");
+const { videoUpload } = require("../../controller/video");
 
+// variables
 const router = Router();
 const multerStorage = multer({ storage: multer.memoryStorage() });
 
-router.route('/').post(userAuthentication, multerStorage.single('video'), controllers.video.videoUpload);
+router
+  .route("/")
+  .post(auth, multerStorage.single("video"), videoUpload);
 
 module.exports = router;

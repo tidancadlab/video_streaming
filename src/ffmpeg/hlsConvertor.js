@@ -1,8 +1,6 @@
 const { exec } = require('child_process');
-const { ffmpegVideoHlsScript } = require('../Script/ScriptGenerator');
+const { ffmpegVideoHlsScript } = require('./Script/ScriptGenerator');
 const { infoLog } = require('../logger');
-const { checkParameters } = require('../utils');
-const { CustomError, CODES } = require('../error');
 
 const videoConversionProgress = (data, duration) => {
   const output = data.toString('utf8');
@@ -12,56 +10,52 @@ const videoConversionProgress = (data, duration) => {
     const timeArray = currentTime.split(':');
     const [seconds, ms] = timeArray[2].split('.');
     const inSecond = Number(seconds) + Number(timeArray[1] * 60) + Number(timeArray[0] * 60 * 60);
-    const percent = parseFloat(`${inSecond}.${ms}`) / duration;
-    process.stdout.write(`\r[${'#'.repeat((100 * percent).toFixed(0))}${' '.repeat((100 - 100 * percent).toFixed(0))}] ${(percent * 100).toFixed(2)}% `);
+    return `${((parseFloat(`${inSecond}.${ms}`) / duration) * 100).toFixed(2)} % Completed [ ${`${parseFloat(`${inSecond}.${ms}`)} of ${duration}`} ]`;
   }
+  return null;
 };
 
-const hls = {
-  /**
-   *
-   * @param {string} videoSourcePath
-   * @param {number} videoDuration
-   * @param {import('fluent-ffmpeg').FfprobeStream} [metadata]
-   * @param {string} [destinationPath]
-   * @returns {Promise<{hlsUrl: string, message: string}>}
-   */
-  async convertor(videoSourcePath, videoDuration, metadata, destinationPath) {
-    const videoMeta = metadata || {};
-    infoLog('Start', 'HLS-Video-Converter');
-    const paramTypes = {
-      videoSourcePath: 'string',
-      videoDuration: 'number',
-      destinationPath: ['string', 'undefined'],
-    };
-    checkParameters(paramTypes, { videoSourcePath, videoDuration, destinationPath }, CODES.HLS_INIT.code);
+const hlsConvertor = async (videoSource, destinationPath, videoDuration) => {
+  if (!videoSource || !destinationPath || !videoDuration) return new Error(`3 parameter required`);
+  const command = await ffmpegVideoHlsScript(videoSource, destinationPath);
+  console.log(command);
+  return new Promise((resolve, reject) => {
+    try {
+      const exc = exec(command);
 
-    const command = ffmpegVideoHlsScript(videoSourcePath, destinationPath, {
-      ...videoMeta,
-    });
-    return new Promise((resolve, reject) => {
-      const exc = exec(command.script, (err) => {
-        if (err) {
-          console.error(err);
-          reject(new CustomError({ message: err.message, name: err.name, ...err, code: CODES.HLS_ERROR.code }));
+      exc.stderr.on('data', async (data) => {
+        const log = videoConversionProgress(data, videoDuration);
+        if (log) {
+          infoLog(log, 'HLS-stderr-data');
         }
       });
 
-      exc.stderr.on('data', async (data) => {
-        videoConversionProgress(data, videoDuration);
+      exc.stdout.on('data', (data) => {
+        const frame = Buffer.from(data).toString('base64');
+        infoLog(frame, 'HLS-stdout-data');
       });
 
       exc.on('close', async (code) => {
-        infoLog(`close code ${code}`, 'HLS-Video-Converter-on-close');
-        if (code !== 0) {
-          reject(new CustomError(`Something went wrong in Video Conversion : closed with code - ${code}`, 'hls-close', CODES.HLS_ERROR.code));
+        infoLog(`close code ${code}`, 'HLS-on-close');
+        if (code === 0) {
+          resolve({ ok: true, message: 'Video conversion completed' });
         } else {
-          infoLog();
-          resolve({ hlsUrl: command.destination, message: CODES.HLS_SUCCESS.message });
+          resolve({ ok: false, message: 'something went wrong' });
         }
       });
-    });
-  },
+
+      exc.on('exit', async (code) => {
+        infoLog(`exit code ${code}`, 'HLS-on-exit');
+        if (code > 1) {
+          resolve({ ok: false, message: 'Something went wrong' });
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 };
 
-module.exports = hls;
+module.exports = {
+  hlsConvertor,
+};

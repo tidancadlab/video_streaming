@@ -1,15 +1,13 @@
-const login = require('./Login');
-const video = require('./Videos');
-const upload = require('./Upload');
-const register = require('./Register');
-const testRoute = require('./testRoute');
+const register = require("./Register");
+const login = require("./Login");
+const upload = require("./Upload");
+const video = require("./Videos");
+const auth = require("../auth");
 
-const appRoute = {
+module.exports = {
   register,
   login,
   upload,
   video,
-  testRoute,
+  auth,
 };
-
-module.exports = appRoute;

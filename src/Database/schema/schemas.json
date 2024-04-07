@@ -116,10 +116,21 @@
                 "notNull": true,
                 "description": "Foreign key referencing the user who uploaded the video."
             },
-            "original_path": {
+            "path": {
                 "type": "string",
                 "notNull": true,
-                "description": "original path to the video file on the server"
+                "description": "Path to the video file on the server"
+            },
+            "source": {
+                "type": "string",
+                "notNull": true,
+                "description": "source to the original video file on the server"
+            },
+            "is_relesed": {
+                "type": "boolean",
+                "notNull": true,
+                "description": "Indicates whether the video is publicly available.",
+                "defaultItem": "false"
             },
             "time_stamp": {
                 "type": "bigint",
@@ -131,36 +142,6 @@
                     "table": "user",
                     "column": "id",
                     "description": "Foreign key constraint referencing the user table's id."
-                }
-            }
-        },
-        "hls_video": {
-            "id": {
-                "type": "string",
-                "notNull": true,
-                "primaryKey": true,
-                "description": "Unique identifier for the hls_video."
-            },
-            "video_id": {
-                "type": "string",
-                "notNull": true,
-                "description": "Foreign key referencing the video"
-            },
-            "hls_url": {
-                "type": "string",
-                "notNull": true,
-                "description": "hls path to the hls video file on the server"
-            },
-            "time_stamp": {
-                "type": "bigint",
-                "notNull": true,
-                "description": "Timestamp of video creation."
-            },
-            "foreignKey": {
-                "video_id": {
-                    "table": "video",
-                    "column": "id",
-                    "description": "Foreign key constraint referencing the video table's id"
                 }
             }
         },
@@ -326,7 +307,7 @@
                 "notNull": true,
                 "description": "Description of the video"
             },
-            "category": {
+            "catagery": {
                 "type": "string",
                 "notNull": true,
                 "description": "Category of the video"
@@ -335,6 +316,16 @@
                 "type": "string",
                 "notNull": true,
                 "description": "Comma-separated tags associated with the video"
+            },
+            "url": {
+                "type": "string",
+                "notNull": true,
+                "description": "URL of the video (possibly different from video.url)"
+            },
+            "path": {
+                "type": "string",
+                "notNull": true,
+                "description": "Path to the video file on the server"
             },
             "time_stamp": {
                 "type": "datetime",

@@ -16,8 +16,3 @@ SQLite
 test
 .prettierrc
 tables.sqlite
-view
-*.test.js
-doc
-videoQueueContainer.json
-working

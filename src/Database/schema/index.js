@@ -1,5 +1,5 @@
-const { run, get } = require('../SQLMethod');
-const schemas = require('./schemas.json')[0];
+const { run, get } = require("../SQLMethod");
+const schemas = require("./schemas.json")[0];
 
 /**
  * @param {string} table name of the table
@@ -9,15 +9,21 @@ const sqlQuery = async (table, schema = schemas) => {
   const tableSchema = schema[table];
   const tableList = Object.keys(tableSchema);
 
-  if (!tableSchema || typeof tableSchema !== 'object') {
-    throw new Error('schema not available');
+  if (!tableSchema || typeof tableSchema !== "object") {
+    return new Error("schema not available");
   }
 
   let query = `CREATE TABLE IF NOT EXISTS ${table} (\n`;
   for (const [i, columns] of Object.entries(tableList)) {
-    const { type, notNull, description, primaryKey = false, defaultItem = false } = tableSchema[columns];
-    const comma = parseInt(i, 10) !== tableList.length - 1 ? ',' : '';
-    const isForeignKey = columns.toLowerCase() === 'foreignkey';
+    const {
+      type,
+      notNull,
+      description,
+      primaryKey = false,
+      defaultItem = false,
+    } = tableSchema[columns];
+    const comma = parseInt(i, 10) !== tableList.length - 1 ? "," : "";
+    const isForeignKey = columns.toLowerCase() === "foreignkey";
     if (isForeignKey) {
       const { foreignKey } = tableSchema;
       for (const key of Object.keys(foreignKey)) {
@@ -25,16 +31,16 @@ const sqlQuery = async (table, schema = schemas) => {
       }
     } else {
       query += `  ${columns}`;
-      if (type || typeof type === 'string') {
-        if (type.toLowerCase() === 'string') {
+      if (type || typeof type === "string") {
+        if (type.toLowerCase() === "string") {
           query += ` VARCHAR(255)`;
-        } else if (['datetime', 'bigint'].includes(type.toLowerCase())) {
+        } else if (["datetime", "bigint"].includes(type.toLowerCase())) {
           query += ` BIGINT`;
         } else {
           query += ` ${type.toUpperCase()}`;
         }
       } else {
-        throw new Error('data type required');
+        return new Error("data type required");
       }
 
       if (primaryKey === true) {
@@ -56,17 +62,23 @@ const sqlQuery = async (table, schema = schemas) => {
 
 /**
  * @param {string} table
+ * @returns {Promise<{ ok: boolean, message: string } | Error>}
  */
 const tableSchema = async (table) => {
   if (!schemas[table]) {
-    throw new Error(`Schema not available, 
+    return new Error(`Schema not available, 
       please create schema for ${table} table`);
   }
-  const isTableExist = await get(`SELECT name FROM sqlite_master WHERE type="table" and name = "${table}"`);
-  if (!isTableExist || isTableExist.name !== table) {
-    const query = await sqlQuery(table);
-    const result = await run(query);
-    return { ...result, message: `Table ${table} created successful` };
+  try {
+    const isTableExist = await get(`SELECT name FROM sqlite_master 
+      WHERE type="table" and name = "${table}"`);
+    if (!isTableExist || isTableExist.name !== table) {
+      const query = await sqlQuery(table);
+      const result = await run(query);
+      return { ...result, message: `Table ${table} created successful` };
+    }
+  } catch (error) {
+    return error;
   }
   return { ok: true, message: `Table ${table} already exist in Database` };
 };
