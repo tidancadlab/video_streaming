@@ -1,54 +1,60 @@
-/* eslint-disable implicit-arrow-linebreak */
-const db = require("./dbConnect");
-/**
- *
- * @param {string} query `string` of SQL query which can for insert, delete, drop, update
- * @returns {Promise<{ok: boolean, result: string | object | Array }>}
- */
-const run = (query) =>
-  new Promise((resolve, reject) => {
-    db.run(query, (error, result) => {
-      if (error) {
-        reject(error);
-        console.log(error);
-        return;
-      }
-      resolve({ ok: true, result });
-    });
-  });
-/**
- *
- * @param {string} query `string` of SQL SELECT query
- * @returns { Promise<{}>} single first row as per SQL query in `object`
- */
-const get = (query) =>
-  new Promise((resolve, reject) => {
-    db.get(query, (error, result) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve(result);
-    });
-  });
-/**
- *
- * @param {string} query `string` of SQL SELECT query
- * @returns {Promise<[{}, {}, ...{}]>} all rows which will match with query in `Array`
- */
-const all = (query) =>
-  new Promise((resolve, reject) => {
-    db.all(query, (error, result) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve(result);
-    });
-  });
+const db = require('./dbConnect');
 
-module.exports = {
-  run,
-  get,
-  all,
+const databaseMethods = {
+  /**
+   *
+   * @param {string} sql
+   * @param {Array} [param]
+   * @returns {Promise<{ok: boolean, result: string | object | Array } | Error>}
+   */
+  run(sql, param) {
+    return new Promise((resolve, reject) => {
+      const run = param ? db.run.bind(db, sql, param) : db.run.bind(db, sql);
+      run((error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(result);
+      });
+    });
+  },
+  /**
+   *
+   * @param {string} sql `string` of SQL SELECT query
+   * @param {Array} [param]
+   * @returns { Promise<{}>} single first row as per SQL query in `object`
+   */
+  get(sql, param) {
+    return new Promise((resolve, reject) => {
+      const get = param ? db.get.bind(db, sql, param) : db.get.bind(db, sql);
+      get((error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(result);
+      });
+    });
+  },
+  /**
+   *
+   * @param {string} sql `string` of SQL SELECT query
+   * @param {Array} [param]
+   * @returns {Promise<[{}, {}, ...{}]>} all rows which will match with query in `Array`
+   */
+  all(sql, param) {
+    return new Promise((resolve, reject) => {
+      const all = param ? db.all.bind(db, sql, param) : db.all.bind(db, sql);
+      all((error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(result);
+      });
+    });
+  },
 };
+
+module.exports = databaseMethods;

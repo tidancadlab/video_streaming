@@ -1,6 +1,8 @@
 module.exports = {
   PATH: {
     VIDEO_STORAGE: 'c:/coding/storage',
+    MEDIA_API_BASE: 'api/storage',
+    IP: '59.89.172.168',
   },
   FOLDERNAME: {
     THUMBNAIL: 'thumbnail',
@@ -8,5 +10,5 @@ module.exports = {
   FILENAME: {
     VIDEO_ORIGINAL: 'original',
   },
-  DEBUG: false,
+  LOG_LEVEL: 'info',
 };
