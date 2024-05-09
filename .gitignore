@@ -3,7 +3,6 @@ content
 test
 *db
 FFMPEG*.md
-FFMPEG*.js
 *log
 .env
 .eslint*
