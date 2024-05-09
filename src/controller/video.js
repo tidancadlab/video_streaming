@@ -58,7 +58,7 @@ const videoController = {
       const { id, isTail } = body;
       const extension = getFileExtension(file.originalname);
 
-      if (!extension || !['mp4', 'mov', 'avi'].includes(extension.toLowerCase())) {
+      if (!extension || !['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(extension.toLowerCase())) {
         return res.status(415).json({ ok: false, message: `The file extension .${extension} is not supported. It must be mp4, mov, or avi.` });
       }
       const { filename, videoDirectoryPath, videoSourcePath, videoId } = await createVideoData(id, extension);

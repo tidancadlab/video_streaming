@@ -1,8 +1,8 @@
 const { exec } = require('child_process');
-const { ffmpegVideoHlsScript } = require('../Script/ScriptGenerator');
 const { infoLog } = require('../logger');
 const { checkParameters } = require('../utils');
 const { CustomError, CODES } = require('../error');
+const ffmpegScript = require('../Script/ScriptGenerator');
 
 const videoConversionProgress = (data, duration) => {
   const output = data.toString('utf8');
@@ -13,7 +13,7 @@ const videoConversionProgress = (data, duration) => {
     const [seconds, ms] = timeArray[2].split('.');
     const inSecond = Number(seconds) + Number(timeArray[1] * 60) + Number(timeArray[0] * 60 * 60);
     const percent = parseFloat(`${inSecond}.${ms}`) / duration;
-    process.stdout.write(`\r[${'#'.repeat((100 * percent).toFixed(0))}${' '.repeat((100 - 100 * percent).toFixed(0))}] ${(percent * 100).toFixed(2)}% `);
+    process.stdout.write(`\r[${'#'.repeat((100 * percent).toFixed(0))}${'.'.repeat((100 - 100 * percent).toFixed(0))}] ${(percent * 100).toFixed(2)}% `);
   }
 };
 
@@ -21,24 +21,16 @@ const hls = {
   /**
    *
    * @param {string} videoSourcePath
-   * @param {number} videoDuration
-   * @param {import('fluent-ffmpeg').FfprobeStream} [metadata]
-   * @param {string} [destinationPath]
    * @returns {Promise<{hlsUrl: string, message: string}>}
    */
-  async convertor(videoSourcePath, videoDuration, metadata, destinationPath) {
-    const videoMeta = metadata || {};
+  async convertor(videoSourcePath) {
     infoLog('Start', 'HLS-Video-Converter');
     const paramTypes = {
       videoSourcePath: 'string',
-      videoDuration: 'number',
-      destinationPath: ['string', 'undefined'],
     };
-    checkParameters(paramTypes, { videoSourcePath, videoDuration, destinationPath }, CODES.HLS_INIT.code);
+    checkParameters(paramTypes, { videoSourcePath }, CODES.HLS_INIT.code);
 
-    const command = ffmpegVideoHlsScript(videoSourcePath, destinationPath, {
-      ...videoMeta,
-    });
+    const command = await ffmpegScript.HLSVideo(videoSourcePath);
     return new Promise((resolve, reject) => {
       const exc = exec(command.script, (err) => {
         if (err) {
@@ -48,7 +40,7 @@ const hls = {
       });
 
       exc.stderr.on('data', async (data) => {
-        videoConversionProgress(data, videoDuration);
+        videoConversionProgress(data, command.duration);
       });
 
       exc.on('close', async (code) => {

@@ -21,3 +21,6 @@ view
 doc
 videoQueueContainer.json
 working
+dnsZone.json
+src/Script/ScriptGenerator/*.json
+src/utils/systemInfo.js
