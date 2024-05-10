@@ -3,7 +3,6 @@ content
 test
 *db
 FFMPEG*.md
-FFMPEG*.js
 *log
 .env
 .eslint*
@@ -21,3 +20,6 @@ view
 doc
 videoQueueContainer.json
 working
+dnsZone.json
+src/Script/ScriptGenerator/*.json
+src/utils/systemInfo.js

@@ -13,12 +13,14 @@ const modelsVideo = {
    */
   async getVideos(search) {
     const rest = search || {};
+
+    // TODO: Parameters which will use to retrieve data from video table
     const { groupBy, orderBy, limit, order = 0, offset = 0 } = rest;
     try {
       const query = `SELECT u.full_name, v.id AS id, v.time_stamp AS video_created_at, json_extract('[' || GROUP_CONCAT(
     JSON_OBJECT('id', t.id, 'url', CONCAT( ? ,t.url), 'size', t.size, 'height', t.height, 'width', t.width, 'created_at', t.time_stamp)
     ) || ']', '$') AS thumbnails FROM user AS u JOIN video AS v ON u.id = v.user_id LEFT JOIN thumbnail AS t ON v.id = t.video_id WHERE t.url is not null GROUP BY v.id;`;
-      const params = [`http://${PATH.IP}:5500/${PATH.MEDIA_API_BASE}/`];
+      const params = [`${PATH.SERVER_BASE_URL}/${PATH.MEDIA_API_BASE}/`];
       const result = await all(query, params);
       return {
         video: result.map((v) => ({ ...v, thumbnails: JSON.parse(v.thumbnails) })),
@@ -66,7 +68,7 @@ const modelsVideo = {
   async getVideoById(id) {
     try {
       const sql = 'select v.id as id, CONCAT(?, hls.hls_url) as url from video as v inner join hls_video as hls on v.id = hls.video_id where v.id = ?';
-      const data = await get(sql, [`http://${PATH.IP}:5500/${PATH.MEDIA_API_BASE}/`, id]);
+      const data = await get(sql, [`${PATH.SERVER_BASE_URL}/${PATH.MEDIA_API_BASE}/`, id]);
       return { ok: true, message: 'retrieved successfully', data };
     } catch (error) {
       console.log(error);
