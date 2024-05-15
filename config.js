@@ -1,15 +1,18 @@
+require('dotenv').config();
+
+// Please set environment variable into .env
 module.exports = {
   PATH: {
-    VIDEO_STORAGE: 'c:/coding/storage',
-    MEDIA_API_BASE: 'api/storage',
+    VIDEO_STORAGE: process.env.VIDEO_STORAGE, // where you want store Original video, HLS files and thumbnails
+    MEDIA_API_BASE: process.env.MEDIA_API_BASE, // end point of static media file like https://domain.com/api/media/movie_id/hls/master.m3u8
   },
   URL: {
-    SERVER_BASE_URL: 'http://localhost:5500', // TODO: Please fill you Server base url name like : "https://domain.com"
+    SERVER_BASE_URL: process.env.SERVER_BASE_URL, // Domain of your server API example: https://api.domain.com
   },
   FOLDERNAME: {
-    THUMBNAIL: 'thumbnail',
+    THUMBNAIL: 'thumbnail', // name of directory where thumbnail will store
   },
   FILENAME: {
-    VIDEO_ORIGINAL: 'original',
+    VIDEO_ORIGINAL: 'original', // name of source video file
   },
 };

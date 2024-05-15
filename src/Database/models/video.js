@@ -1,7 +1,7 @@
 const { all, run, get } = require('../SQLMethod');
 const { checkParameters } = require('../../utils');
 const { CustomError, CODES } = require('../../error');
-const { PATH } = require('../../../config');
+const { PATH, URL } = require('../../../config');
 
 const modelsVideo = {
   /**
@@ -20,7 +20,7 @@ const modelsVideo = {
       const query = `SELECT u.full_name, v.id AS id, v.time_stamp AS video_created_at, json_extract('[' || GROUP_CONCAT(
     JSON_OBJECT('id', t.id, 'url', CONCAT( ? ,t.url), 'size', t.size, 'height', t.height, 'width', t.width, 'created_at', t.time_stamp)
     ) || ']', '$') AS thumbnails FROM user AS u JOIN video AS v ON u.id = v.user_id LEFT JOIN thumbnail AS t ON v.id = t.video_id WHERE t.url is not null GROUP BY v.id;`;
-      const params = [`${PATH.SERVER_BASE_URL}/${PATH.MEDIA_API_BASE}/`];
+      const params = [`${URL.SERVER_BASE_URL}/${PATH.MEDIA_API_BASE}/`];
       const result = await all(query, params);
       return {
         video: result.map((v) => ({ ...v, thumbnails: JSON.parse(v.thumbnails) })),
