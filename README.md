@@ -31,17 +31,19 @@ This endpoint is used for user login. It authenticates the user and returns a JW
   ```json
   {
     "token": "jwt-token-string",
-    "user": {
-      "id": "user-id",
-      "name": "User Name",
-      "email": "user@example.com"
-    }
+    "message": "Welcome Back"
+  }
+  ```
+- **Failure (404):**
+  ```json
+  {
+    "message": "User not found"
   }
   ```
 - **Failure (401):**
   ```json
   {
-    "error": "Invalid credentials"
+    "message": "Invalid credentials"
   }
   ```
 
@@ -70,18 +72,16 @@ This endpoint is used for user registration. It creates a new user account and r
 - **Success (201):**
   ```json
   {
-    "token": "jwt-token-string",
-    "user": {
-      "id": "user-id",
-      "name": "User Name",
-      "email": "user@example.com"
-    }
+      "message": "successfully registered",
+      "username": "email",
+      "ok": true,
+      "date": Date(),
   }
   ```
 - **Failure (400):**
   ```json
   {
-    "error": "User already exists"
+    "message": "User already exists"
   }
   ```
 
@@ -95,7 +95,6 @@ This endpoint retrieves a list of all videos available for streaming.
 
 - **URL:** `/api/videos`
 - **Method:** `GET`
-- **Headers:** `Authorization: Bearer jwt-token-string`
 
 **Response:**
 
@@ -105,23 +104,32 @@ This endpoint retrieves a list of all videos available for streaming.
     "videos": [
       {
         "id": "video-id",
-        "title": "Video Title",
+        "user": "Uploaded by",
+        "title": "video title",
         "description": "Video Description",
-        "url": "video-url",
-        "resolution": "1080p"
+        "thumbnails": [{
+          "id": "thumbnail-id",
+          "url": "Thumbnail url",
+          "size": "Thumbnail size in kb",
+          "height": "Thumbnail height",
+          "width": "Thumbnail width",
+          "created_at": "Thumbnail time_stamp",
+        }, 
+        ...]
+        "video_created_at": "time stamp"
       },
       ...
     ]
   }
   ```
 
-#### **POST /api/videos**
+#### **POST /api/upload**
 
 This endpoint allows a registered user to upload a new video.
 
 **Request:**
 
-- **URL:** `/api/videos`
+- **URL:** `/api/upload`
 - **Method:** `POST`
 - **Headers:** 
   - `Authorization: Bearer jwt-token-string`
@@ -139,13 +147,67 @@ This endpoint allows a registered user to upload a new video.
     "message": "Video uploaded successfully",
     "video": {
       "id": "video-id",
-      "title": "Video Title",
-      "description": "Video Description",
-      "url": "video-url",
-      "resolution": "1080p"
+      "title": "Video Title"
     }
   }
   ```
+
+**Example:**
+
+```javascript
+let chunks = [];
+  // Divide file into chunks and store into Array
+  const handleUpload = (videoFile) => {
+    try {
+      const chunkSize = 1024 * 1024 * 2;
+      let offset = 0;
+
+      while (offset < videoFile.size) {
+        const chunk = videoFile.slice(offset, offset + chunkSize);
+        chunks.push(chunk);
+        offset += chunkSize;
+      }
+
+      const isLast = chunks.length === 1;
+      const chunk = chunks.shift();
+      onUploadChunk(videoFile, chunk);
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onUploadChunk = (videoFile, chunk, isLast = false) => {
+    const { id, name, lastModified, size } = videoFile;
+
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('video', chunk, name);
+    formData.append('lastModified', lastModified);
+    formData.append('size', size);
+    formData.append('isTail', isLast);
+
+    readyAxios
+      .post(`api/upload`, formData)
+      .then((data) => {         
+        if (data.status === 200) {
+          // this will run recursively
+          if(chunks.length >= 1){
+            const isLast = chunks.length === 1;
+            const chunk = chunks.shift();
+            onUploadChunk(videoFile, chunk, isLast)
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  handleUpload(videoFile)
+
+```
+
 - **Failure (400):**
   ```json
   {
@@ -155,23 +217,26 @@ This endpoint allows a registered user to upload a new video.
 
 ### 4. Video Streaming
 
-#### **GET /api/videos/:id**
+#### **GET /api/videos/player/:id** - get video by id for player
 
-This endpoint streams a video by its ID.
+This endpoint retrieves a list of all videos available for streaming.
 
 **Request:**
 
-- **URL:** `/api/videos/:id`
+- **URL:** `/api/videos/player/:id`
 - **Method:** `GET`
-- **Headers:** `Authorization: Bearer jwt-token-string`
 
 **Response:**
 
-- **Success (200):** Streamed video content.
-- **Failure (404):**
+- **Success (200):**
   ```json
   {
-    "error": "Video not found"
+    "ok": true,
+    "message": "retrieved successfully",
+    "data": {
+              "id": "video-id",
+              "url": "https://api.whiteblob.site/api/media/xxxxxxxxx/master.m3u8",
+            }
   }
   ```
 
@@ -186,7 +251,7 @@ All error responses follow a consistent format:
 
 ## Authentication
 
-All endpoints, except for `/api/auth/login` and `/api/auth/register`, require a valid JWT token to be included in the `Authorization` header of the request.
+Endpoint `/api/upload` require a valid JWT token to be included in the `Authorization` header of the request.
 
 Example:
 ```
