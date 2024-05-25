@@ -26,7 +26,7 @@ const isUserExist = async (req, res, next) => {
     next();
     return;
   }
-  res.send({ message: "user already registered" });
+  res.status(400).send({ message: "user already registered" });
 };
 
 const loginUser = (req, res, next) => {

@@ -8,12 +8,11 @@ const initializeDatabase = async (index = 0) => {
   try {
     const data = await tableSchema(tableList[index]);
     if (data.ok) {
-      const i = index + 1;
-      if (tableList.length - 1 >= i) {
-        return initializeDatabase(i);
+      if (tableList.length - 1 >= index + 1) {
+        return initializeDatabase(index + 1);
       }
       infoLog('Database setup done', 'database');
-      return i;
+      return index;
     }
     return new Error('something went wrong');
   } catch (error) {

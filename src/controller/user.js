@@ -6,7 +6,7 @@ const newUser = async (req, res) => {
   const { email, fullName, password } = req.body;
   const result = await models.user.register(email, password, fullName);
   if (result.ok) {
-    res.status(200).send(result);
+    res.status(201).send(result);
     return;
   }
   res.status(403).send(result);
@@ -18,7 +18,6 @@ const newUser = async (req, res) => {
 const getUser = async (req, res) => {
   const { email, password } = req.body;
   const user = await models.user.get(email);
-  console.log(user);
   if (!user) {
     res.status(404).send({ message: 'User not found' });
   } else {
@@ -27,7 +26,7 @@ const getUser = async (req, res) => {
       const token = jwt.sign({ id: user.id }, process.env.TOKENKEY);
       res.cookie('token', token, { httpOnly: true }).send({ message: 'Welcome Back', token });
     } else {
-      res.status(404).send({ message: 'wrong password' });
+      res.status(401).send({ message: 'Invalid credentials' });
     }
   }
 };

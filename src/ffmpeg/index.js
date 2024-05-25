@@ -181,7 +181,7 @@ const videoConversion = {
         const videoDuration = typeof duration !== 'number' ? format.duration : duration;
 
         await operation.metaInfoAndVideo(id, userId, stream || streams[0], format.size, frameRate, videoDuration, videoSourceAbsolutePath);
-        await operation.thumbnail(id, videoSourceAbsolutePath, height, height / width, { size: [256, 360, -1] });
+        await operation.thumbnail(id, videoSourceAbsolutePath, height, height / width, { size: [256] });
         await operation.hlsAndHlsTable(id, videoSourceAbsolutePath, videoDuration, stream || streams[0]);
 
         videoQueueItem.updateStatusCode(id, videoProcessStatusCode, true);
