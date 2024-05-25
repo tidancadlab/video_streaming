@@ -1,11 +1,14 @@
 const { appendFile } = require('fs');
 const { randomUUID } = require('crypto');
+
 const config = require('../../config');
-const { joinPath, createDirectory } = require('../utils');
-const models = require('../Database/models');
-const videoQueueItem = require('../queue');
 const { infoLog } = require('../logger');
+const videoQueueItem = require('../queue');
 const videoConversion = require('../ffmpeg');
+const models = require('../Database/models');
+const { joinPath, createDirectory } = require('../utils');
+const { setVideoProfile, updateVideoProfile, deleteVideoProfile } = require('../Database/models/video');
+const { get } = require('../Database/SQLMethod');
 
 // Object to store video data temporarily
 const items = {};
@@ -23,15 +26,15 @@ const createVideoData = async (id, extension) => {
   const item = items[id];
   if (item) return { videoId: id, ...item };
 
-  const videoId = randomUUID();
+  const videoId = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i.test(id) ? id : randomUUID();
   const filename = `${config.FILENAME.VIDEO_ORIGINAL}.${extension}`;
-  const videoDirectoryPath = await joinPath(config.PATH.VIDEO_STORAGE, videoId);
+  const videoDirectoryPath = joinPath(config.PATH.VIDEO_STORAGE, videoId);
   createDirectory(videoDirectoryPath);
 
   const videoItem = {
     filename,
     videoDirectoryPath,
-    videoSourcePath: await joinPath(videoDirectoryPath, filename),
+    videoSourcePath: joinPath(videoDirectoryPath, filename),
   };
 
   items[videoId] = videoItem;
@@ -61,7 +64,9 @@ const videoController = {
       if (!extension || !['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(extension.toLowerCase())) {
         return res.status(415).json({ ok: false, message: `The file extension .${extension} is not supported. It must be mp4, mov, or avi.` });
       }
+
       const { filename, videoDirectoryPath, videoSourcePath, videoId } = await createVideoData(id, extension);
+
       appendFile(videoSourcePath, Buffer.from(file.buffer), (err) => {
         if (err) {
           throw err;
@@ -82,9 +87,9 @@ const videoController = {
           filename,
           userId: payload.id,
         });
+
         videoConversion.init();
         delete items[videoId];
-        console.log('item deleted', items);
       } else {
         res.send(videoId);
       }
@@ -120,6 +125,63 @@ const videoController = {
       console.error(error);
       res.status(500).send('Internal server error.');
     }
+  },
+
+  // <------------------- Video Profile --------------------------------------------->
+  /**
+   *
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  async setVideoProfile(req, res) {
+    const { videoId, title, description, category, tags } = req.body;
+    try {
+      const isAlreadyCreated = await get('SELECT * from video_profile where video_id = ?', [videoId]);
+      if (isAlreadyCreated) return res.status(409).send({ error: 'already exist' });
+      const result = await setVideoProfile({ videoId, category, description, tags, title });
+      res.status(201).send(result);
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+    return null;
+  },
+
+  /**
+   *
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  async updateVideoProfile(req, res) {
+    const { id, title, description, category, tags } = req.body;
+    if (!id) return res.status(404).send({ error: 'id should be available for update Video profile' });
+
+    try {
+      const isAlreadyCreated = await get('SELECT * from video_profile where id = ?', [id]);
+      if (!isAlreadyCreated) return res.status(404).send({ error: 'not exist' });
+      const result = await updateVideoProfile({ id, title, description, category, tags });
+      res.status(200).send(result);
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+    return null;
+  },
+  /**
+   *
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  async deleteVideoProfile(req, res) {
+    const { id } = req.body;
+    const { id: userId } = req.payload;
+    try {
+      const videoProfile = await get('SELECT * from video_profile where id = ? and user_id = ?', [id, userId]);
+      if (!videoProfile) return res.status(401).send({ ok: false });
+      const result = await deleteVideoProfile(id);
+      res.status(201).send(result);
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+    return null;
   },
 };
 

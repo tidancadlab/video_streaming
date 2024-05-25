@@ -14,6 +14,7 @@ const sqlQuery = async (table, schema = schemas) => {
   }
 
   let query = `CREATE TABLE IF NOT EXISTS ${table} (\n`;
+
   for (const [i, columns] of Object.entries(tableList)) {
     const { type, notNull, description, primaryKey = false, defaultItem = false } = tableSchema[columns];
     const comma = parseInt(i, 10) !== tableList.length - 1 ? ',' : '';
@@ -47,7 +48,7 @@ const sqlQuery = async (table, schema = schemas) => {
       } else if (notNull === true) {
         query += ` NOT NULL${comma} --${description}\n`;
       } else {
-        query += ` ${comma} --${description}`;
+        query += ` ${comma} --${description}\n`;
       }
     }
   }
@@ -66,7 +67,7 @@ const tableSchema = async (table) => {
   if (!isTableExist || isTableExist.name !== table) {
     const query = await sqlQuery(table);
     const result = await run(query);
-    return { ...result, message: `Table ${table} created successful` };
+    return { ok: true, ...result, message: `Table ${table} created successful` };
   }
   return { ok: true, message: `Table ${table} already exist in Database` };
 };

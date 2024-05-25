@@ -5,7 +5,7 @@ class Auth {
   static async init(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      res.status(403);
+      res.status(401);
       res.send({ message: 'Unauthorized Access' });
     } else {
       const [prefix, token] = authHeader.split(' ');

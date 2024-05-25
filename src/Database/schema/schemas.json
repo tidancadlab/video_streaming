@@ -318,22 +318,22 @@
             },
             "title": {
                 "type": "string",
-                "notNull": true,
+                "notNull": false,
                 "description": "Title of the video"
             },
             "description": {
                 "type": "string",
-                "notNull": true,
+                "notNull": false,
                 "description": "Description of the video"
             },
             "category": {
                 "type": "string",
-                "notNull": true,
+                "notNull": false,
                 "description": "Category of the video"
             },
             "tags": {
                 "type": "string",
-                "notNull": true,
+                "notNull": false,
                 "description": "Comma-separated tags associated with the video"
             },
             "time_stamp": {
