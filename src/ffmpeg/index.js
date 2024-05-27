@@ -138,20 +138,18 @@ const operation = {
    * @param {number} videoDuration
    */
   async hlsAndHlsTable(videoId, videoSourceAbsolutePath, videoDuration, metadata) {
+    if (this.isPendingOperation(CODES.HLS_TABLE_INIT.code)) {
+      await models.hlsVideo.hlsInsert(videoId, `${videoId}/hls/master.m3u8`);
+      videoProcessStatusCode = CODES.HLS_TABLE_SUCCESS.code;
+    } else {
+      infoLog('Already Done', 'HLS-Video-Table_Insert');
+    }
     if (this.isPendingOperation(CODES.HLS_SUCCESS.code)) {
       const { hlsUrl } = await hls.convertor(videoSourceAbsolutePath, videoDuration, metadata);
       await videoQueueItem.update(videoId, { hlsUrl });
       videoProcessStatusCode = CODES.HLS_SUCCESS.code;
     } else {
       infoLog('Already Done', 'HLS-Video-Converter');
-    }
-
-    if (this.isPendingOperation(CODES.HLS_TABLE_SUCCESS.code, CODES.HLS_SUCCESS.code)) {
-      const { hlsUrl } = await videoQueueItem.getVideoItem(videoId);
-      await models.hlsVideo.hlsInsert(videoId, hlsUrl);
-      videoProcessStatusCode = CODES.HLS_TABLE_SUCCESS.code;
-    } else {
-      infoLog('Already Done', 'HLS-Video-Table_Insert');
     }
   },
 };
@@ -181,7 +179,7 @@ const videoConversion = {
         const videoDuration = typeof duration !== 'number' ? format.duration : duration;
 
         await operation.metaInfoAndVideo(id, userId, stream || streams[0], format.size, frameRate, videoDuration, videoSourceAbsolutePath);
-        await operation.thumbnail(id, videoSourceAbsolutePath, height, height / width, { size: [256] });
+        await operation.thumbnail(id, videoSourceAbsolutePath, height, height / width, { size: [256], time: 10 });
         await operation.hlsAndHlsTable(id, videoSourceAbsolutePath, videoDuration, stream || streams[0]);
 
         videoQueueItem.updateStatusCode(id, videoProcessStatusCode, true);

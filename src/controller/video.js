@@ -101,9 +101,15 @@ const videoController = {
   },
 
   // <---------------- Video search controller start ------------------->
+  /**
+   *
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
   async searchVideo(req, res) {
+    const { category = '' } = req.query;
     try {
-      const result = await models.video.getVideos();
+      const result = await models.video.getVideos({ category });
       res.status(result.ok ? 200 : 403).send(result);
     } catch (error) {
       console.error(error);

@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 const path = require('path');
 const utils = require('../../utils');
+const iso639Language = require('../../../assets/iso636-3-full.json');
 const { getMeteData } = require('../../Middleware/video');
 const { CustomError, CODES } = require('../../error');
 
@@ -69,7 +70,7 @@ const audioVideoMapped = async (metadata) => {
       audioScript += ` -map 0:a:${idx}`;
 
       // Audio group properties
-      const audioName = `audio/${data.tags?.language || 'hin'}`;
+      const audioName = `audio/${iso639Language[data.tags?.language] || 'hindi'}`;
       const audioLanguage = data.tags?.language || 'hin';
       const isAudioDefault = idx === 0 ? 'YES' : 'NO';
 

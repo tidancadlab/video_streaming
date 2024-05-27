@@ -170,52 +170,52 @@ const CODES = {
   HLS_INIT: { message: 'Initialized HLS Converter.', isError: false, code: 500 },
 
   /**
-   * Parameter not passed correctly for HLS Converter.
-   * @type {ErrorMessage}
-   */
-  HLS_PARAMS_ERROR: { message: 'Parameter not passed correctly for HLS Converter.', isError: true, code: 501 },
-
-  /**
-   * Script not generated for HLS Converter.
-   * @type {ErrorMessage}
-   */
-  HLS_SCRIPT_ERROR: { message: 'Script not generated for HLS Converter.', isError: true, code: 502 },
-
-  /**
-   * Something went wrong during video converting in HLS Converter.
-   * @type {ErrorMessage}
-   */
-  HLS_ERROR: { message: 'Something went wrong during video converting in HLS Converter.', isError: true, code: 503 },
-
-  /**
-   * Video successfully Converted in HLS.
-   * @type {ErrorMessage}
-   */
-  HLS_SUCCESS: { message: 'Video successfully Converted in HLS.', isError: false, code: 510 },
-
-  /**
    * Initialized HLS Table inserting.
    * @type {ErrorMessage}
    */
-  HLS_TABLE_INIT: { message: 'Initialized HLS Table inserting.', isError: false, code: 511 },
+  HLS_TABLE_INIT: { message: 'Initialized HLS Table inserting.', isError: false, code: 501 },
 
   /**
    * Parameter not passed correctly for HLS table.
    * @type {ErrorMessage}
    */
-  HLS_TABLE_PARAMS_ERROR: { message: 'Parameter not passed correctly for HLS table.', isError: false, code: 513 },
+  HLS_TABLE_PARAMS_ERROR: { message: 'Parameter not passed correctly for HLS table.', isError: false, code: 502 },
 
   /**
    * Something went wrong during inserting in HLS table.
    * @type {ErrorMessage}
    */
-  HLS_TABLE_ERROR: { message: 'Something went wrong during inserting in HLS table.', isError: false, code: 514 },
+  HLS_TABLE_ERROR: { message: 'Something went wrong during inserting in HLS table.', isError: false, code: 503 },
 
   /**
    * HLS Video successfully inserted in HLS Table.
    * @type {ErrorMessage}
    */
-  HLS_TABLE_SUCCESS: { message: 'HLS Video successfully inserted in HLS Table.', isError: false, code: 520 },
+  HLS_TABLE_SUCCESS: { message: 'HLS Video successfully inserted in HLS Table.', isError: false, code: 510 },
+
+  /**
+   * Parameter not passed correctly for HLS Converter.
+   * @type {ErrorMessage}
+   */
+  HLS_PARAMS_ERROR: { message: 'Parameter not passed correctly for HLS Converter.', isError: true, code: 511 },
+
+  /**
+   * Script not generated for HLS Converter.
+   * @type {ErrorMessage}
+   */
+  HLS_SCRIPT_ERROR: { message: 'Script not generated for HLS Converter.', isError: true, code: 512 },
+
+  /**
+   * Something went wrong during video converting in HLS Converter.
+   * @type {ErrorMessage}
+   */
+  HLS_ERROR: { message: 'Something went wrong during video converting in HLS Converter.', isError: true, code: 513 },
+
+  /**
+   * Video successfully Converted in HLS.
+   * @type {ErrorMessage}
+   */
+  HLS_SUCCESS: { message: 'Video successfully Converted in HLS.', isError: false, code: 520 },
 };
 
 /**
