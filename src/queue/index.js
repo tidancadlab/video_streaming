@@ -75,6 +75,7 @@ const videoQueueItem = {
    * @param {number} [data.aspectRatio]
    * @param {number} [data.duration]
    * @param {number} [data.height]
+   * @param {boolean} [data.hasThumbnail]
    */
   async createItem(id, data) {
     infoLog('queue item creation started');

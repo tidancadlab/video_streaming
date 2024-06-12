@@ -1,6 +1,5 @@
 /* eslint-disable valid-typeof */
 const { statSync } = require('fs');
-const { randomUUID } = require('crypto');
 const hls = require('./hlsConvertor');
 const { infoLog } = require('../logger');
 const { joinPath, checkParameters } = require('../utils');
@@ -9,6 +8,7 @@ const videoQueueItem = require('../queue');
 const { getMeteData } = require('../Middleware/video');
 const { createThumbnail } = require('./thumbnailGenerator');
 const { CODES } = require('../error');
+const config = require('../../config');
 
 let isMachineBusy = false;
 let videoProcessStatusCode = 100;
@@ -82,15 +82,15 @@ const operation = {
    * @param {string} videoDirectoryPath
    * @param {number} height
    * @param {number} aspectRatio
-   * @param {object} config
-   * @param {string} [config.folder]
-   * @param {string} [config.filename]
-   * @param {Array<number>} [config.size]
-   * @param {number} [config.time]
+   * @param {object} rest
+   * @param {string} [rest.folder]
+   * @param {string} [rest.filename]
+   * @param {Array<number>} [rest.size]
+   * @param {number} [rest.time]
    * @returns
    */
 
-  async thumbnail(videoId, videoDirectoryPath, height, aspectRatio, config) {
+  async thumbnail(videoId, videoDirectoryPath, height, aspectRatio, rest) {
     infoLog('Start', 'ffmpeg-operation-thumbnail');
 
     const paramType = {
@@ -102,7 +102,7 @@ const operation = {
     checkParameters(paramType, { videoDirectoryPath, videoId, height, aspectRatio });
 
     if (this.isPendingOperation(CODES.THUMBNAIL_GENERATE_SUCCESS.code)) {
-      const imageList = await createThumbnail(videoDirectoryPath, { ...config });
+      const imageList = await createThumbnail(videoDirectoryPath, { ...rest });
       await videoQueueItem.update(videoId, { imageList });
       videoProcessStatusCode = CODES.THUMBNAIL_GENERATE_SUCCESS.code;
     } else {
@@ -114,13 +114,13 @@ const operation = {
       let { imageList } = await videoQueueItem.getVideoItem(videoId);
       infoLog(imageList);
       if (!imageList || imageList?.length <= 0) {
-        imageList = await createThumbnail(videoDirectoryPath, { ...config });
+        imageList = await createThumbnail(videoDirectoryPath, { ...rest });
       }
       const startInserting = async () => {
         const imageObject = imageList.shift();
         const pictureHeight = imageObject.size === -1 ? height : imageObject.size;
         const fileSize = statSync(imageObject.output).size;
-        await models.thumbnail.insert(randomUUID(), videoId, imageObject.url, fileSize, pictureHeight, aspectRatio * pictureHeight);
+        await models.thumbnail.insert(videoId, imageObject.url, fileSize, pictureHeight, aspectRatio * pictureHeight);
         return imageList.length > 0 ? startInserting() : null;
       };
       await startInserting();
@@ -138,20 +138,18 @@ const operation = {
    * @param {number} videoDuration
    */
   async hlsAndHlsTable(videoId, videoSourceAbsolutePath, videoDuration, metadata) {
+    if (this.isPendingOperation(CODES.HLS_TABLE_INIT.code)) {
+      await models.hlsVideo.hlsInsert(videoId, `${videoId}/hls/master.m3u8`);
+      videoProcessStatusCode = CODES.HLS_TABLE_SUCCESS.code;
+    } else {
+      infoLog('Already Done', 'HLS-Video-Table_Insert');
+    }
     if (this.isPendingOperation(CODES.HLS_SUCCESS.code)) {
       const { hlsUrl } = await hls.convertor(videoSourceAbsolutePath, videoDuration, metadata);
       await videoQueueItem.update(videoId, { hlsUrl });
       videoProcessStatusCode = CODES.HLS_SUCCESS.code;
     } else {
       infoLog('Already Done', 'HLS-Video-Converter');
-    }
-
-    if (this.isPendingOperation(CODES.HLS_TABLE_SUCCESS.code, CODES.HLS_SUCCESS.code)) {
-      const { hlsUrl } = await videoQueueItem.getVideoItem(videoId);
-      await models.hlsVideo.hlsInsert(videoId, hlsUrl);
-      videoProcessStatusCode = CODES.HLS_TABLE_SUCCESS.code;
-    } else {
-      infoLog('Already Done', 'HLS-Video-Table_Insert');
     }
   },
 };
@@ -167,7 +165,7 @@ const videoConversion = {
     isMachineBusy = true;
     const queueItem = await videoQueueItem.getVideoItem();
     if (typeof queueItem === 'object') {
-      const { id, videoDirectoryPath, userId = 10, filename, statusCode } = queueItem;
+      const { id, videoDirectoryPath, userId = 10, filename, statusCode, hasThumbnail } = queueItem;
       try {
         const videoSourceAbsolutePath = joinPath(videoDirectoryPath, filename);
         videoProcessStatusCode = statusCode;
@@ -181,7 +179,14 @@ const videoConversion = {
         const videoDuration = typeof duration !== 'number' ? format.duration : duration;
 
         await operation.metaInfoAndVideo(id, userId, stream || streams[0], format.size, frameRate, videoDuration, videoSourceAbsolutePath);
-        await operation.thumbnail(id, videoSourceAbsolutePath, height, height / width, { size: [256] });
+        if (!hasThumbnail) {
+          await operation.thumbnail(id, videoSourceAbsolutePath, height, height / width, { size: [256], time: 10 });
+        } else {
+          const thumbnailDirPath = joinPath(config.PATH.VIDEO_STORAGE, id, config.FOLDERNAME.THUMBNAIL, 'original.jpeg');
+          await operation.thumbnail(id, thumbnailDirPath, height, height / width, {
+            size: [256],
+          });
+        }
         await operation.hlsAndHlsTable(id, videoSourceAbsolutePath, videoDuration, stream || streams[0]);
 
         videoQueueItem.updateStatusCode(id, videoProcessStatusCode, true);
@@ -190,7 +195,7 @@ const videoConversion = {
       } catch (error) {
         infoLog(error);
 
-        videoQueueItem.updateStatusCode(id, error.code || videoProcessStatusCode, `${error.message} \n`, true);
+        videoQueueItem.updateStatusCode(id, videoProcessStatusCode || CODES.QUEUE_ERROR.code, `${error.message} \n`, true);
         isMachineBusy = false;
         videoConversion.init();
       }

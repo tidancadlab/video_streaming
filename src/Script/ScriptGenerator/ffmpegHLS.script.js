@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 const path = require('path');
 const utils = require('../../utils');
+const iso639Language = require('../../../assets/iso636-3-full.json');
 const { getMeteData } = require('../../Middleware/video');
 const { CustomError, CODES } = require('../../error');
 
@@ -69,7 +70,7 @@ const audioVideoMapped = async (metadata) => {
       audioScript += ` -map 0:a:${idx}`;
 
       // Audio group properties
-      const audioName = `audio/${data.tags?.language || 'hin'}`;
+      const audioName = `audio/${iso639Language[data.tags?.language] || 'hindi'}`;
       const audioLanguage = data.tags?.language || 'hin';
       const isAudioDefault = idx === 0 ? 'YES' : 'NO';
 
@@ -101,7 +102,7 @@ const HLSVideo = async (sourceVideoPath, destination) => {
   const preCudaScript = '-hwaccel nvdec -hwaccel_output_format cuda -extra_hw_frames 5';
   const audioVideoCodecs = '-c:v h264_nvenc -c:a aac';
   const audioVideoMapScript = await audioVideoMapped(videoMetadata);
-  const hlsPostScript = '-threads 0 -f hls -hls_playlist_type event -hls_time 3';
+  const hlsPostScript = '-threads 0 -f hls -hls_playlist_type event -hls_time 5';
   const segmentName = `-hls_segment_filename "${utils.joinPath(hlsVideoDestinationPath || '.', 'hls/%v/file-%00d.ts')}"`;
   const masterPlaylistName = '-master_pl_name master.m3u8';
   const outputManifestDirectory = utils.joinPath(hlsVideoDestinationPath || '.', 'hls/%v/manifest.m3u8');

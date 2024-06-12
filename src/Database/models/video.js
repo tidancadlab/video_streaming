@@ -16,9 +16,12 @@ const modelsVideo = {
     const rest = search || {};
 
     // TODO: Parameters which will use to retrieve data from video table
-    const { groupBy, orderBy, limit, order = 0, offset = 0 } = rest;
+    const { groupBy, orderBy, limit, category = '', order = 0, offset = 0 } = rest;
     try {
-      const query = `SELECT vp.title as title,
+      const query = `SELECT vp.category as category, 
+       vp.title as title,
+       vp.tags as tags,
+       vmi.duration as duration,
        u.full_name,
        v.id AS id,
        v.time_stamp AS video_created_at,
@@ -32,11 +35,12 @@ const modelsVideo = {
      FROM user AS u JOIN video AS v ON u.id = v.user_id 
      LEFT JOIN thumbnail AS t ON v.id = t.video_id 
      LEFT JOIN video_profile as vp ON v.id = vp.video_id
-     GROUP BY v.id order by video_created_at ;`;
+     LEFT JOIN video_meta_info as vmi ON v.id = vmi.video_id where category like '%${category}%'
+     GROUP BY v.id order by video_created_at desc ;`;
       const params = [`${URL.SERVER_BASE_URL}/${PATH.MEDIA_API_BASE}/`];
       const result = await all(query, params);
       return {
-        videos: result.map((v) => ({ ...v, thumbnails: JSON.parse(v.thumbnails) })),
+        videos: result.map((v) => ({ ...v, thumbnails: JSON.parse(v.thumbnails), tags: JSON.parse(v.tags), duration: parseInt(v.duration, 10) })),
         ok: true,
         total: result.length,
         message: 'retrieve videos successfully',
@@ -78,8 +82,15 @@ const modelsVideo = {
   },
 
   async getVideoById(id) {
-    const sql = 'select v.id as id, CONCAT(?, hls.hls_url) as url from video as v inner join hls_video as hls on v.id = hls.video_id where v.id = ?';
-    const data = await get(sql, [`${URL.SERVER_BASE_URL}/${PATH.MEDIA_API_BASE}/`, id]);
+    const sql = `select vp.title as title, 
+    vp.description as description, 
+    v.id as id, CONCAT(?, hls.hls_url) as url, 
+    v.time_stamp as video_created_at, 
+    CONCAT(?, t.url) as thumbnail 
+    from video as v inner join hls_video as hls on v.id = hls.video_id 
+    left join thumbnail as t on v.id = t.video_id 
+    left join video_profile as vp on v.id = vp.video_id where v.id = ?`;
+    const data = await get(sql, [`${URL.SERVER_BASE_URL}/${PATH.MEDIA_API_BASE}/`, `${URL.SERVER_BASE_URL}/${PATH.MEDIA_API_BASE}/`, id]);
     return { ok: true, message: 'retrieved successfully', data };
   },
 

@@ -14,6 +14,15 @@ const utils = {
   },
 
   /**
+   *
+   * @param {string} filename
+   * @returns
+   */
+  getFileExtension(filename) {
+    return filename.split('.').pop();
+  },
+
+  /**
    * @param  {...string} arg
    * @returns
    */

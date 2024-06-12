@@ -1,52 +1,12 @@
-const { appendFile } = require('fs');
-const { randomUUID } = require('crypto');
+const { appendFileSync } = require('fs');
 
-const config = require('../../config');
 const { infoLog } = require('../logger');
 const videoQueueItem = require('../queue');
 const videoConversion = require('../ffmpeg');
 const models = require('../Database/models');
-const { joinPath, createDirectory } = require('../utils');
-const { setVideoProfile, updateVideoProfile, deleteVideoProfile } = require('../Database/models/video');
 const { get } = require('../Database/SQLMethod');
-
-// Object to store video data temporarily
-const items = {};
-
-/**
- * @param {string} id
- * @param {string} extension
- * @returns {Promise<{filename: string, videoDirectoryPath: string, videoSourcePath: string, videoId: string}>}
- * @description Creates a new video directory for the specified video directory path and video source path.
- */
-const createVideoData = async (id, extension) => {
-  if (typeof extension !== 'string') throw new Error('Second parameter "extension" should be of type string.');
-  if (typeof id !== 'string') throw new Error('First parameter "id" should be of type string.');
-
-  const item = items[id];
-  if (item) return { videoId: id, ...item };
-
-  const videoId = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i.test(id) ? id : randomUUID();
-  const filename = `${config.FILENAME.VIDEO_ORIGINAL}.${extension}`;
-  const videoDirectoryPath = joinPath(config.PATH.VIDEO_STORAGE, videoId);
-  createDirectory(videoDirectoryPath);
-
-  const videoItem = {
-    filename,
-    videoDirectoryPath,
-    videoSourcePath: joinPath(videoDirectoryPath, filename),
-  };
-
-  items[videoId] = videoItem;
-  return { videoId, ...videoItem };
-};
-
-/**
- *
- * @param {string} filename
- * @returns
- */
-const getFileExtension = (filename) => filename.split('.').pop();
+const { createVideoEnvironment, items } = require('../helper/createVideoEnvironment');
+const { setVideoProfile, updateVideoProfile, deleteVideoProfile } = require('../Database/models/video');
 
 const videoController = {
   /**
@@ -56,42 +16,33 @@ const videoController = {
    * @returns
    */
   async videoUpload(req, res) {
+    if (req.body.isTail === 'false') {
+      res.end();
+    }
     try {
       const { body, file, payload } = req;
       const { id, isTail } = body;
-      const extension = getFileExtension(file.originalname);
 
-      if (!extension || !['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(extension.toLowerCase())) {
-        return res.status(415).json({ ok: false, message: `The file extension .${extension} is not supported. It must be mp4, mov, or avi.` });
-      }
+      const { filename, videoDirectoryPath, videoSourcePath, videoId, hasThumbnail } = await createVideoEnvironment(id, file, body);
 
-      const { filename, videoDirectoryPath, videoSourcePath, videoId } = await createVideoData(id, extension);
-
-      appendFile(videoSourcePath, Buffer.from(file.buffer), (err) => {
-        if (err) {
-          throw err;
-        }
-      });
+      appendFileSync(videoSourcePath, Buffer.from(file.buffer));
 
       if (isTail === 'true') {
         infoLog(`Video received and saved successfully - ${file.originalname}`, 'video-controller');
         res.json({
           id: videoId,
           ok: true,
-          message: 'Full video received and saved successfully in the database.',
-          videoSourcePath: `${config.PATH.MEDIA_API_BASE}/${joinPath(videoId, filename)}`,
         });
 
         await videoQueueItem.createItem(videoId, {
           videoDirectoryPath,
           filename,
           userId: payload.id,
+          hasThumbnail,
         });
 
         videoConversion.init();
         delete items[videoId];
-      } else {
-        res.send(videoId);
       }
     } catch (error) {
       console.error(error);
@@ -100,10 +51,45 @@ const videoController = {
     return null;
   },
 
-  // <---------------- Video search controller start ------------------->
-  async searchVideo(req, res) {
+  // TODO: <---------------- Initialize Video Uploading Process in single without chunk -------------->
+  async videoSingleUpload(req, res) {
     try {
-      const result = await models.video.getVideos();
+      const { body, file, payload } = req;
+      const { id } = body;
+
+      const { filename, videoDirectoryPath, videoId, hasThumbnail } = await createVideoEnvironment(id, file, body);
+
+      infoLog(`Video received and saved successfully - ${file.originalname}`, 'video-controller');
+      res.json({
+        id: videoId,
+        ok: true,
+      });
+
+      await videoQueueItem.createItem(videoId, {
+        videoDirectoryPath,
+        filename,
+        userId: payload.id,
+        hasThumbnail,
+      });
+
+      videoConversion.init();
+      delete items[videoId];
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ ok: false, message: error.message, error_name: error.name });
+    }
+    return null;
+  },
+  // <---------------- Video search controller start ------------------->
+  /**
+   *
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   */
+  async searchVideo(req, res) {
+    const { category = '' } = req.query;
+    try {
+      const result = await models.video.getVideos({ category });
       res.status(result.ok ? 200 : 403).send(result);
     } catch (error) {
       console.error(error);
