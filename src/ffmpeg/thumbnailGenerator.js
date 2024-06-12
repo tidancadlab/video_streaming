@@ -5,7 +5,7 @@ const { infoLog } = require('../logger');
 const { CustomError, CODES } = require('../error');
 
 /**
- * @param {string} videoSource - should be absolute path.
+ * @param {string} source - should be absolute path.
  * @param {object} [config]
  * @param {string} [config.folder] - default value is thumbnails
  * @param {string} [config.filename] - default value is thumbnail
@@ -14,15 +14,16 @@ const { CustomError, CODES } = require('../error');
  * @returns {Promise<[{url: string, size: number, outPath: string}]>}
  */
 
-const createThumbnail = async (videoSource, config) => {
+const createThumbnail = async (source, config) => {
   infoLog('Generator start', 'thumbnail-item-insert');
-  if (!videoSource || typeof videoSource !== 'string') {
+  if (!source || typeof source !== 'string') {
     throw new CustomError({ ...CODES.THUMBNAIL_GENERATE_PARAMS_ERROR, name: 'thumbnail-generator-no-params' });
   }
 
   const rest = config || {};
-  const { dir } = path.parse(videoSource);
-  const folder = rest.folder || 'thumbnails';
+  const isImage = ['jpeg', 'jpg', 'png'].includes(source.split('.').at(-1));
+  const { dir } = path.parse(source);
+  const folder = rest.folder || 'thumbnail';
   if (path.isAbsolute(folder)) {
     throw new CustomError(
       'folder name should not be absolute, it should be relative from source folder',
@@ -32,7 +33,7 @@ const createThumbnail = async (videoSource, config) => {
   }
   const filename = rest.filename || 'thumbnail';
   let extension = filename.split('.', 2)[1];
-  const outPath = joinPath(dir, folder);
+  const outPath = isImage ? dir : joinPath(dir, folder);
   let time;
   let size = [];
   const imageUrls = [];
@@ -40,7 +41,7 @@ const createThumbnail = async (videoSource, config) => {
   await createDirectory(outPath);
 
   if (!extension) {
-    extension = `.png`;
+    extension = `.jpeg`;
   } else {
     extension = `.${extension}`;
   }
@@ -70,11 +71,13 @@ const createThumbnail = async (videoSource, config) => {
   async function generate(n) {
     const pictureName = `${filename}_${size[n] !== -1 ? size[n] : 'original'}${extension}`;
     const output = joinPath(outPath, pictureName);
-    const url = joinPath(dir.split('/').pop(), folder, pictureName);
-    const command = `ffmpeg -v error -ss ${time} -i ${videoSource} -y -vf "thumbnail=360,scale=-1:${size[n]}" -frames:v 1 ${output}`;
+    const url = isImage ? joinPath(dir.split('/').at(-2), folder, pictureName) : joinPath(dir.split('/').pop(), folder, pictureName);
+    const command = `ffmpeg -v error ${!isImage ? `-ss ${time}` : ''} -i ${source} -y -vf "thumbnail=360,scale=-1:${size[n]}" -frames:v 1 ${output}`;
+    console.log(command);
     return new Promise((resolve, reject) => {
       const exc = exec(command, (err) => {
         if (err) {
+          console.error(err);
           reject(new CustomError(err.message, err.name, CODES.THUMBNAIL_GENERATE_ERROR.code));
         }
       });

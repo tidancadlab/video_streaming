@@ -102,7 +102,7 @@ const HLSVideo = async (sourceVideoPath, destination) => {
   const preCudaScript = '-hwaccel nvdec -hwaccel_output_format cuda -extra_hw_frames 5';
   const audioVideoCodecs = '-c:v h264_nvenc -c:a aac';
   const audioVideoMapScript = await audioVideoMapped(videoMetadata);
-  const hlsPostScript = '-threads 0 -f hls -hls_playlist_type event -hls_time 3';
+  const hlsPostScript = '-threads 0 -f hls -hls_playlist_type event -hls_time 5';
   const segmentName = `-hls_segment_filename "${utils.joinPath(hlsVideoDestinationPath || '.', 'hls/%v/file-%00d.ts')}"`;
   const masterPlaylistName = '-master_pl_name master.m3u8';
   const outputManifestDirectory = utils.joinPath(hlsVideoDestinationPath || '.', 'hls/%v/manifest.m3u8');
