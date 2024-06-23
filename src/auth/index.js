@@ -2,16 +2,21 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 class Auth {
+  /**
+   *
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   * @param {import('express').NextFunction} next
+   * @returns
+   */
   static async init(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      res.status(401);
-      res.send({ message: 'Unauthorized Access' });
+      res.status(401).send({ message: 'Unauthorized Access' });
     } else {
       const [prefix, token] = authHeader.split(' ');
       if (prefix !== 'bearer') {
-        res.status(403);
-        res.send({ message: 'Not a correct way to pass the Key' });
+        res.status(403).send({ message: 'Not a correct way to pass the Key' });
         return;
       }
       try {
@@ -19,8 +24,7 @@ class Auth {
         req.payload = isAuthorized;
         next();
       } catch (error) {
-        res.status(403);
-        res.send({ message: error.message });
+        res.status(403).send({ message: error.message });
       }
     }
   }

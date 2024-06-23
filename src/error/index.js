@@ -243,6 +243,180 @@ class CustomError extends Error {
   }
 }
 
-const errors = { CustomError, CODES };
+const statusByCode = {
+  100: {
+    message: 'Something went wrong in Initializing Queue Container.',
+    isError: true,
+    code: 100,
+  },
+  101: {
+    message: 'Parameter not passed correctly.',
+    isError: true,
+    code: 101,
+  },
+  102: {
+    message: 'Item not added in Queue Container.',
+    isError: true,
+    code: 102,
+  },
+  103: {
+    message: 'Video item already exists in Queue Container.',
+    isError: true,
+    code: 103,
+  },
+  110: {
+    message: 'New video item added successfully in Queue Container.',
+    isError: false,
+    code: 110,
+  },
+  111: {
+    message: 'Video Item not found in Queue Container.',
+    isError: true,
+    code: 111,
+  },
+  120: {
+    message: 'Video Item found in Queue Container.',
+    isError: false,
+    code: 120,
+  },
+  200: {
+    message: 'Initialized Video Table inserting.',
+    isError: false,
+    code: 200,
+  },
+  201: {
+    message: 'Parameter not passed correctly for video table.',
+    isError: true,
+    code: 201,
+  },
+  202: {
+    message: 'Item not added in Video Table.',
+    isError: true,
+    code: 202,
+  },
+  203: {
+    message: 'Video item already exists in Video Table.',
+    isError: true,
+    code: 203,
+  },
+  210: {
+    message: 'Video item added successfully in Video Table.',
+    isError: false,
+    code: 210,
+  },
+  300: {
+    message: 'Initialized Video_Meta_Data Table inserting.',
+    isError: false,
+    code: 300,
+  },
+  301: {
+    message: 'Parameter not passed correctly for video_Meta_Data table.',
+    isError: true,
+    code: 301,
+  },
+  302: {
+    message: 'Item not added in Video_Meta_Data Table.',
+    isError: true,
+    code: 302,
+  },
+  303: {
+    message: 'Video meta data already exists in Video_Meta_Data Table.',
+    isError: true,
+    code: 303,
+  },
+  310: {
+    message: 'Video meta data added successfully in Video_Meta_Data Table.',
+    isError: false,
+    code: 310,
+  },
+  400: {
+    message: 'Initialized thumbnail generator inserting.',
+    isError: false,
+    code: 400,
+  },
+  401: {
+    message: 'Parameter not passed correctly for thumbnail generator.',
+    isError: true,
+    code: 401,
+  },
+  402: {
+    message: 'Script not generated for thumbnail generator.',
+    isError: true,
+    code: 402,
+  },
+  403: {
+    message: 'Something went wrong during thumbnail generation.',
+    isError: true,
+    code: 403,
+  },
+  410: {
+    message: 'Thumbnail generated successfully.',
+    isError: false,
+    code: 410,
+  },
+  411: {
+    message: 'Initialized Thumbnail Table inserting.',
+    isError: false,
+    code: 411,
+  },
+  412: {
+    message: 'Something went wrong in Thumbnail Table.',
+    isError: false,
+    code: 412,
+  },
+  420: {
+    message: 'Added successfully in Thumbnail Table.',
+    isError: false,
+    code: 420,
+  },
+  500: { message: 'Initialized HLS Converter.', isError: false, code: 500 },
+  501: {
+    message: 'Initialized HLS Table inserting.',
+    isError: false,
+    code: 501,
+  },
+  502: {
+    message: 'Parameter not passed correctly for HLS table.',
+    isError: false,
+    code: 502,
+  },
+  503: {
+    message: 'Something went wrong during inserting in HLS table.',
+    isError: false,
+    code: 503,
+  },
+  510: {
+    message: 'HLS Video successfully inserted in HLS Table.',
+    isError: false,
+    code: 510,
+  },
+  511: {
+    message: 'Parameter not passed correctly for HLS Converter.',
+    isError: true,
+    code: 511,
+  },
+  512: {
+    message: 'Script not generated for HLS Converter.',
+    isError: true,
+    code: 512,
+  },
+  513: {
+    message: 'Something went wrong during video converting in HLS Converter.',
+    isError: true,
+    code: 513,
+  },
+  520: {
+    message: 'Video successfully Converted in HLS.',
+    isError: false,
+    code: 520,
+  },
+  601: {
+    message: 'Parameter not passed correctly for Remove video item from queue container.',
+    isError: true,
+    code: 601,
+  },
+};
+
+const errors = { CustomError, statusByCode, CODES };
 
 module.exports = errors;

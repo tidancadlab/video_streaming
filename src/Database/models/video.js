@@ -24,6 +24,7 @@ const modelsVideo = {
        vmi.duration as duration,
        u.full_name,
        v.id AS id,
+       v.is_released as is_released,
        v.time_stamp AS video_created_at,
        json_extract('[' || GROUP_CONCAT(JSON_OBJECT('id', t.id,
         'url', CONCAT( ? ,t.url),
@@ -35,7 +36,7 @@ const modelsVideo = {
      FROM user AS u JOIN video AS v ON u.id = v.user_id 
      LEFT JOIN thumbnail AS t ON v.id = t.video_id 
      LEFT JOIN video_profile as vp ON v.id = vp.video_id
-     LEFT JOIN video_meta_info as vmi ON v.id = vmi.video_id where category like '%${category}%'
+     LEFT JOIN video_meta_info as vmi ON v.id = vmi.video_id where category like '%${category}%' and is_released = 1
      GROUP BY v.id order by video_created_at desc ;`;
       const params = [`${URL.SERVER_BASE_URL}/${PATH.MEDIA_API_BASE}/`];
       const result = await all(query, params);

@@ -3,6 +3,7 @@ const { static } = require('express');
 const { PATH } = require('../../config');
 const testRoute = require('../Routes/testRoute');
 const { login, register, upload, video } = require('../Routes');
+const studio = require('../Routes/studio');
 
 module.exports = async (app) => {
   app.use('/api/auth/login', login);
@@ -10,6 +11,7 @@ module.exports = async (app) => {
   app.use('/api/upload', upload);
   app.use('/api/video', video);
   app.use('/api/video/profile', video);
+  app.use('/api/studio', studio);
   app.use('/api/test', testRoute);
   app.use('/' + PATH.MEDIA_API_BASE, static(PATH.VIDEO_STORAGE));
 };

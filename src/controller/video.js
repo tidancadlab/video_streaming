@@ -106,7 +106,11 @@ const videoController = {
   async videoById(req, res) {
     try {
       const data = await models.video.getVideoById(req.params.id);
-      res.status(data.ok ? 200 : 500).send(data.ok ? data : 'Something went wrong.');
+      if (!data.data) {
+        res.status(404).send({ data: null, message: 'Video not found' });
+      } else {
+        res.status(200).send(data);
+      }
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal server error.');

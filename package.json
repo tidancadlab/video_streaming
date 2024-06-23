@@ -4,6 +4,7 @@
   "description": "Low bitrate good quality video streaming",
   "repository": "https://github.com/tidancadlab/video_streaming/",
   "main": "./src/index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "nodemon index",
     "nodemon": "node index",
